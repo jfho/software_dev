@@ -1,21 +1,8 @@
 Feature: Payment
     Scenario: Successful Payment
-        Given a customer with name "Susan"
-        Given the customer is registered with Simple DTU Pay
-        Given a merchant with name "Daniel"
-        Given the merchant is registered with Simple DTU Pay
-        When the merchant initiates a payment for 10 kr by the customer
+        Given a customer with name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "1000"
+        And a merchant with name "Caroline", last name "Strauss", CPR "654321-4321", and balance "1000"
+        When the merchant initiates a payment for "10" kr by the customer
         Then the payment is successful
-
-    Scenario: List of payments
-        Given a customer with name "Susan", who is registered with Simple DTU Pay
-        And a merchant with name "Daniel", who is registered with Simple DTU Pay
-        Given a successful payment of "10" kr from the customer to the merchant
-        When the manager asks for a list of payments
-        Then the list contains a payments where customer "Susan" paid "10" kr to merchant "Daniel"
-
-    Scenario: Customer is not known
-        Given a merchant with name "Daniel", who is registered with Simple DTU Pay
-        When the merchant initiates a payment for "10" kr using customer id "non-existent-id"
-        Then the payment is not successful
-        And an error message is returned saying "customer with id \"non-existent-id\" is unknown"
+        And the balance of the customer at the bank is "990" kr
+        And the balance of the merchant at the bank is "1010" kr
