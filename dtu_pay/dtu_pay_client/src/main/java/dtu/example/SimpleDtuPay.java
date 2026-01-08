@@ -1,6 +1,10 @@
 package dtu.example;
 
 import java.util.List;
+import org.dtu.models.Customer;
+import org.dtu.models.Merchant;
+import org.dtu.models.Transaction;
+import org.dtu.models.TransactionResult;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;

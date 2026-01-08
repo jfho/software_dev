@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.dtu.models.Customer;
+import org.dtu.models.Transaction;
+import org.dtu.models.Merchant;
+
 /**
  * Simple in-memory application-wide "database".
  * Thread-safe collections are used for concurrent access.
@@ -24,7 +28,7 @@ public class Database {
 
     // Customers
     public void addCustomer(Customer c) {
-        customers.put(c.customerId(), c);
+        customers.put(c.getCpr(), c);
     }
 
     public Customer getCustomer(String id) {
@@ -41,7 +45,7 @@ public class Database {
 
     // Merchants
     public void addMerchant(Merchant m) {
-        merchants.put(m.merchantId(), m);
+        merchants.put(m.getCpr(), m);
     }
 
     public Merchant getMerchant(String id) {

@@ -1,5 +1,7 @@
 package org.dtu;
 
+import org.dtu.models.Merchant;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -13,6 +15,6 @@ public class MerchantResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public String registerMerchant(Merchant merchant) {
         db.addMerchant(merchant);
-        return merchant.merchantId();
+        return merchant.getCpr();
     }
 }

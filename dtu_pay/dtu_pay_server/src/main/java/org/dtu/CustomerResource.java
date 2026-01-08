@@ -1,5 +1,7 @@
 package org.dtu;
 
+import org.dtu.models.Customer;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -13,6 +15,6 @@ public class CustomerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public String registerCustomer(Customer customer) {
         db.addCustomer(customer);
-        return customer.customerId();
+        return customer.getCpr();
     }
 }
