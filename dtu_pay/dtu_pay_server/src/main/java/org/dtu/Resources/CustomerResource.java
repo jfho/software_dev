@@ -1,4 +1,7 @@
-package org.dtu;
+package org.dtu.Resources;
+
+import org.dtu.Models.Customer;
+import org.dtu.Models.Database;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
