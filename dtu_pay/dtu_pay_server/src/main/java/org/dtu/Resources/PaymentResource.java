@@ -14,8 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/payments")
 public class PaymentResource {
-    private static final Dotenv dotenv = Dotenv.load();
-    private String bankApiKey = dotenv.get("FM_API_KEY");
+    private String bankApiKey = "yacht7201";
     
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();

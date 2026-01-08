@@ -1,0 +1,7 @@
+services:
+  demo:
+    build: .
+    image: dtu_pay_server
+    container_name: dtu_pay_server
+    ports:
+      - "8080:8080"

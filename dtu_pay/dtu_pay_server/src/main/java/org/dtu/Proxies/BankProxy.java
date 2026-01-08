@@ -25,8 +25,7 @@ import dtu.ws.fastmoney.User;
 
 @Path("/bank")
 public class BankProxy {
-    private static final Dotenv dotenv = Dotenv.load();
-    private String bankApiKey = dotenv.get("FM_API_KEY");
+    private String bankApiKey = "yacht7201";
     
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();
