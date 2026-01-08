@@ -5,7 +5,6 @@ import org.dtu.Models.Transaction;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.BankService_Service;
-import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -13,9 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/payments")
-public class PaymentResource {
-    private String bankApiKey = "yacht7201";
-    
+public class PaymentResource {   
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();
 

@@ -1,5 +1,7 @@
 package dtu.example.Models;
 
-public record BankAccount(String firstName, String lastName, String cpr, Double balance) {
+import java.math.BigDecimal;
+
+public record BankAccount(String firstName, String lastName, String cpr, BigDecimal balance) {
     
 }
