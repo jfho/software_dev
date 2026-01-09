@@ -1,5 +1,8 @@
 package org.dtu.Resources;
 
+import java.util.UUID;
+
+import org.dtu.Controllers.CustomerController;
 import org.dtu.Models.Customer;
 import org.dtu.Models.Database;
 
@@ -19,38 +22,32 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/customers")
 public class CustomerResource {   
-    BankService_Service service = new BankService_Service();
-    BankService bank = service.getBankServicePort();
-
-    private final Database db = Database.getInstance();
+    CustomerController controller = new CustomerController();
 
     @GET
-    @Path("/{username}")
+    @Path("/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Customer getCustomer(@PathParam("username") String username) {
-        Customer customer = db.getCustomer(username);
+    public Customer getCustomer(@PathParam("customerId") String customerId) {
+        Customer customer = controller.getCustomer(customerId);
+
         if (customer == null) {
             throw new NotFoundException("Customer not found");
         }
+
         return customer;
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void registerCustomer(Customer customer) {
-        try {
-            bank.getAccount(customer.bankAccountUuid());
-        } catch (BankServiceException_Exception e) {
-            throw new BadRequestException("Invalid bank account");
-        }
-        
-        db.addCustomer(customer);
+    @Produces(MediaType.APPLICATION_JSON)
+    public Customer registerCustomer(Customer customer) {
+        return controller.registerCustomer(customer);
     }
 
     @DELETE
-    @Path("/{username}")
+    @Path("/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteCustomer(@PathParam("username") String username) {       
-        db.deleteCustomer(username);
+    public void deleteCustomer(@PathParam("customerId") String customerId) {       
+        controller.deleteCustomer(customerId);
     }
 }

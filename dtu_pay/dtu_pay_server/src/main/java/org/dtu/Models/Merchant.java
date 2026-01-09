@@ -1,6 +1,6 @@
 package org.dtu.Models;
 
-public record Merchant(String bankAccountUuid, String username) {
+public record Merchant(String firstName, String lastName, String cpr, String bankAccountUuid, String dtupayUuid) {
 
 }
 

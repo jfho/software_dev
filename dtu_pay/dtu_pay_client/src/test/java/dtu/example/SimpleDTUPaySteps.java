@@ -48,8 +48,7 @@ public class SimpleDTUPaySteps {
     }
 
     @Given("a customer bank account with name {string}, last name {string}, CPR {string}, and balance {string}")
-    public void a_customer_bank_account_with_name_last_name_cpr_and_balance(String firstName, String lastName,
-            String cpr, String balance) {
+    public void a_customer_bank_account_with_name_last_name_cpr_and_balance(String firstName, String lastName, String cpr, String balance) {
         BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
         customerUuid = bank.register(account);
     }
@@ -61,16 +60,16 @@ public class SimpleDTUPaySteps {
         merchantUuid = bank.register(account);
     }
 
-    @When("the customer registers for DTUPay with username {string}")
-    public void the_customer_registers_for_dtu_pay_with_username(String username) {
-        customer = new Customer(customerUuid, username);
-        dtupay.register(customer);
+    @When("the customer registers for DTUPay with first name {string}, last name {string}, cpr {string}")
+    public void the_customer_registers_for_dtu_pay_with_username(String firstName, String lastName, String cpr) {
+        customer = new Customer(firstName, lastName, cpr, customerUuid, null);
+        customer = dtupay.register(customer);
     }
 
-    @When("the merchant registers for DTUPay with username {string}")
-    public void the_merchant_registers_for_dtu_pay_with_username(String username) {
-        merchant = new Merchant(merchantUuid, username);
-        dtupay.register(merchant);
+    @When("the merchant registers for DTUPay with first name {string}, last name {string}, cpr {string}")
+    public void the_merchant_registers_for_dtu_pay_with_username(String firstName, String lastName, String cpr, String bankUuid) {
+        merchant = new Merchant(firstName, lastName, cpr, merchantUuid, null);
+        merchant = dtupay.register(merchant);
     }
 
     @When("the customer unregisters for DTUPay")
@@ -85,36 +84,34 @@ public class SimpleDTUPaySteps {
 
     @When("the customer performs a payment for {string} kr to the merchant")
     public void the_customer_performs_a_payment_for_kr_to_the_merchant(String amount) {
-        dtupay.pay(customer.bankAccountUuid(), merchant.bankAccountUuid(), new BigDecimal(amount));
+        dtupay.pay(customer.dtupayUuid(), merchant.dtupayUuid(), new BigDecimal(amount));
     }
 
     @Then("the customer registration is successful")
     public void the_customer_registration_is_successful() {
-        Customer retrievedCustomer = dtupay.getCustomer(customer.username());
+        Customer retrievedCustomer = dtupay.getCustomer(customer.dtupayUuid());
 
-        assertEquals(customer.username(), retrievedCustomer.username());
-        assertEquals(customer.bankAccountUuid(), retrievedCustomer.bankAccountUuid());
+        assertEquals(customer, retrievedCustomer);
     }
 
     @Then("the merchant registration is successful")
     public void the_merchant_registration_is_successful() {
-        Merchant retrievedMerchant = dtupay.getMerchant(merchant.username());
+        Merchant retrievedMerchant = dtupay.getMerchant(merchant.dtupayUuid());
 
-        assertEquals(merchant.username(), retrievedMerchant.username());
-        assertEquals(merchant.bankAccountUuid(), retrievedMerchant.bankAccountUuid());
+        assertEquals(merchant, retrievedMerchant);
     }
 
     @Then("the customer unregistration is successful")
     public void the_customer_unregistration_is_successful() {
         assertThrows(NotFoundException.class, () -> {
-            dtupay.getCustomer(customer.username());
+            dtupay.getCustomer(customer.dtupayUuid());
         });
     }
 
     @Then("the merchant unregistration is successful")
     public void the_merchant_unregistration_is_successful() {
         assertThrows(NotFoundException.class, () -> {
-            dtupay.getMerchant(merchant.username());
+            dtupay.getMerchant(merchant.dtupayUuid());
         });
     }
 

@@ -24,7 +24,7 @@ public class Database {
 
     // Customers
     public void addCustomer(Customer c) {
-        customers.put(c.username(), c);
+        customers.put(c.dtupayUuid(), c);
     }
 
     public Customer getCustomer(String id) {
@@ -44,7 +44,7 @@ public class Database {
      */
     public boolean deleteCustomer(Customer c) {
         if (c == null) return false;
-        return customers.remove(c.username(), c);
+        return customers.remove(c.dtupayUuid(), c);
     }
 
     /**
@@ -56,7 +56,7 @@ public class Database {
 
     // Merchants
     public void addMerchant(Merchant m) {
-        merchants.put(m.username(), m);
+        merchants.put(m.dtupayUuid(), m);
     }
 
     public Merchant getMerchant(String id) {
@@ -76,7 +76,7 @@ public class Database {
      */
     public boolean deleteMerchant(Merchant m) {
         if (m == null) return false;
-        return merchants.remove(m.username(), m);
+        return merchants.remove(m.dtupayUuid(), m);
     }
 
     /**
