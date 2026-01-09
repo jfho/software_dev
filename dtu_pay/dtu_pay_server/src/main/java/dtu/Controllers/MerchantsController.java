@@ -1,9 +1,9 @@
-package org.dtu.Controllers;
+package dtu.Controllers;
 
 import java.util.UUID;
 
-import org.dtu.Models.Merchant;
-import org.dtu.Models.Database;
+import dtu.Models.Merchant;
+import dtu.Models.Database;
 
 public class MerchantsController {
     private final Database db = Database.getInstance();

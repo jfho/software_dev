@@ -1,9 +1,9 @@
-package org.dtu.Controllers;
+package dtu.Controllers;
 
 import java.util.UUID;
 
-import org.dtu.Models.Customer;
-import org.dtu.Models.Database;
+import dtu.Models.Customer;
+import dtu.Models.Database;
 
 public class CustomerController {
     private final Database db = Database.getInstance();

@@ -1,4 +1,4 @@
-package org.dtu.Models;
+package dtu.Models;
 
 import java.util.List;
 import java.util.Map;
