@@ -1,10 +1,10 @@
-package org.dtu.Controllers;
+package dtu.Controllers;
 
 import java.util.List;
 import java.math.BigDecimal;
 
-import org.dtu.Models.Database;
-import org.dtu.Models.Transaction;
+import dtu.Models.Database;
+import dtu.Models.Transaction;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.BankService_Service;
@@ -23,8 +23,9 @@ public class PaymentController {
     Database db = Database.getInstance();
 
     public void registerTransaction(Transaction transaction) throws BankServiceException_Exception {
-        
-        bank.transferMoneyFromTo(transaction.customerId(), transaction.merchantId(), new BigDecimal(transaction.payment()), "Ordinary transfer");
+        String customerBankId = db.getCustomer(transaction.customerId()).bankAccountUuid();
+        String merchantBankId = db.getMerchant(transaction.merchantId()).bankAccountUuid();
+        bank.transferMoneyFromTo(customerBankId, merchantBankId, new BigDecimal(transaction.payment()), "Ordinary transfer");
         db.addTransaction(transaction);
     }
 

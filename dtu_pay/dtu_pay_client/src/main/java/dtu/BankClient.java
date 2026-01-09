@@ -1,6 +1,6 @@
-package dtu.example;
+package dtu;
 
-import dtu.example.Models.BankAccount;
+import dtu.Models.BankAccount;
 import dtu.ws.fastmoney.Account;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.client.Client;
@@ -42,7 +42,7 @@ public class BankClient {
         try {
             return bank.createAccountWithBalance(bankApiKey, user, account.balance());
         } catch (BankServiceException_Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException("Failed registering with the bank");
         }
     }
 
@@ -50,7 +50,7 @@ public class BankClient {
         try {
             bank.retireAccount(bankApiKey, accountUuid);
         } catch (BankServiceException_Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException("Failed unregistering with the bank");
         }
     }
 }

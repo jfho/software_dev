@@ -1,4 +1,4 @@
-package dtu.example;
+package dtu;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,10 +6,10 @@ import static org.junit.Assert.assertThrows;
 
 import java.math.BigDecimal;
 import java.util.*;
-import dtu.example.Models.BankAccount;
-import dtu.example.Models.Customer;
-import dtu.example.Models.Merchant;
-import dtu.example.Models.Transaction;
+import dtu.Models.BankAccount;
+import dtu.Models.Customer;
+import dtu.Models.Merchant;
+import dtu.Models.Transaction;
 import dtu.ws.fastmoney.Account;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -47,27 +47,27 @@ public class SimpleDTUPaySteps {
         }
     }
 
-    @Given("a customer bank account with name {string}, last name {string}, CPR {string}, and balance {string}")
-    public void a_customer_bank_account_with_name_last_name_cpr_and_balance(String firstName, String lastName, String cpr, String balance) {
+    @Given("a customer bank account with first name {string}, last name {string}, CPR {string}, and balance {string}")
+    public void a_customer_bank_account_with_first_name_last_name_cpr_and_balance(String firstName, String lastName, String cpr, String balance) {
         BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
         customerUuid = bank.register(account);
     }
 
-    @Given("a merchant bank account with name {string}, last name {string}, CPR {string}, and balance {string}")
-    public void a_merchant_bank_account_with_name_last_name_cpr_and_balance(String firstName, String lastName,
+    @Given("a merchant bank account with first name {string}, last name {string}, CPR {string}, and balance {string}")
+    public void a_merchant_bank_account_with_first_name_last_name_cpr_and_balance(String firstName, String lastName,
             String cpr, String balance) {
         BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
         merchantUuid = bank.register(account);
     }
 
-    @When("the customer registers for DTUPay with first name {string}, last name {string}, cpr {string}")
-    public void the_customer_registers_for_dtu_pay_with_username(String firstName, String lastName, String cpr) {
+    @When("the customer registers for DTUPay with first name {string}, last name {string}, CPR {string}")
+    public void the_customer_registers_for_dtu_pay_with_first_name_last_name_cpr(String firstName, String lastName, String cpr) {
         customer = new Customer(firstName, lastName, cpr, customerUuid, null);
         customer = dtupay.register(customer);
     }
 
-    @When("the merchant registers for DTUPay with first name {string}, last name {string}, cpr {string}")
-    public void the_merchant_registers_for_dtu_pay_with_username(String firstName, String lastName, String cpr, String bankUuid) {
+   @When("the merchant registers for DTUPay with first name {string}, last name {string}, CPR {string}")
+    public void the_merchant_registers_for_dtu_pay_with_first_name_last_name_cpr(String firstName, String lastName, String cpr) {
         merchant = new Merchant(firstName, lastName, cpr, merchantUuid, null);
         merchant = dtupay.register(merchant);
     }
@@ -132,12 +132,11 @@ public class SimpleDTUPaySteps {
         transactionsList = dtupay.getPayments();
     }
 
-    @Then("the list contains payments where customer {string} paid {string} kr to merchant {string}")
-    public void the_list_contains_payments_where_customer_paid_kr_to_merchant(String customerUsername, String amount,
-            String merchantUsername) {
+    @Then("the list contains payments where the customer paid {string} kr to the merchant")
+    public void the_list_contains_payments_where_the_customer_paid_kr_to_the_merchant(String amount) {
         boolean containsPayment = false;
         for (Transaction transaction : transactionsList) {
-            if (transaction.payment() == new BigDecimal(amount) && transaction.customerId().equals(customerUsername) && transaction.merchantId().equals(merchantUsername)) {
+            if (transaction.payment().equals(new BigDecimal(amount)) && transaction.customerId().equals(customer.dtupayUuid()) && transaction.merchantId().equals(merchant.dtupayUuid())) {
                 containsPayment = true;
                 break;
             }

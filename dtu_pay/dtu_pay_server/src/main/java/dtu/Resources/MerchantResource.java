@@ -1,10 +1,10 @@
-package org.dtu.Resources;
+package dtu.Resources;
 
 import java.util.UUID;
 
-import org.dtu.Controllers.MerchantsController;
-import org.dtu.Models.Database;
-import org.dtu.Models.Merchant;
+import dtu.Controllers.MerchantsController;
+import dtu.Models.Database;
+import dtu.Models.Merchant;
 
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceException_Exception;

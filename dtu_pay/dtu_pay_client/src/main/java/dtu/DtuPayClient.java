@@ -1,11 +1,11 @@
-package dtu.example;
+package dtu;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import dtu.example.Models.Customer;
-import dtu.example.Models.Merchant;
-import dtu.example.Models.Transaction;
+import dtu.Models.Customer;
+import dtu.Models.Merchant;
+import dtu.Models.Transaction;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;

@@ -1,4 +1,4 @@
-package dtu.example.Models;
+package dtu.Models;
 
 import java.math.BigDecimal;
 

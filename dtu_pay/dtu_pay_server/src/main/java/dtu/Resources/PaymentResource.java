@@ -1,11 +1,11 @@
-package org.dtu.Resources;
+package dtu.Resources;
 
 import java.util.List;
 import java.math.BigDecimal;
 
-import org.dtu.Controllers.PaymentController;
-import org.dtu.Models.Database;
-import org.dtu.Models.Transaction;
+import dtu.Controllers.PaymentController;
+import dtu.Models.Database;
+import dtu.Models.Transaction;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.BankService_Service;
