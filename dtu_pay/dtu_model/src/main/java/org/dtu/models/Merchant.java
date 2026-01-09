@@ -19,6 +19,13 @@ public class Merchant {
         this.cpr = "";
     }
 
+    public int getMerchantId() {
+        if (cpr != null && cpr.length() >= 4) {
+            return Integer.parseInt(cpr.substring(cpr.length() - 4));
+        }
+        return 0;
+    }   
+
     public String getFirstName() {
         return firstName;
     }

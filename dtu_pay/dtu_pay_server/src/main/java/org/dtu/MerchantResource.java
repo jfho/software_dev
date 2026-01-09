@@ -10,11 +10,13 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/merchants")
 public class MerchantResource {
     private final Database db = Database.getInstance();
+    private String merchantCpr;
+    private int merchantId;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public String registerMerchant(Merchant merchant) {
+    public int registerMerchant(Merchant merchant) {
         db.addMerchant(merchant);
-        return merchant.getCpr();
+        return merchant.getMerchantId();
     }
 }

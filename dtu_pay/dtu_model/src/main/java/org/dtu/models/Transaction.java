@@ -1,31 +1,31 @@
 package org.dtu.models;
 
 public class Transaction {
-    private String customerId;
-    private String merchantId;
+    private int customerId;
+    private int merchantId;
     private int amount;
 
     public Transaction() {}
 
-    public Transaction(String customerId, String merchantId, int amount) {
+    public Transaction(int customerId, int merchantId, int amount) {
         this.customerId = customerId;
         this.merchantId = merchantId;
         this.amount = amount;
     }
 
-    public String getCustomerId() {
+    public int getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(String customerId) {
+    public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }
 
-    public String getMerchantId() {
+    public int getMerchantId() {
         return merchantId;
     }
 
-    public void setMerchantId(String merchantId) {
+    public void setMerchantId(int merchantId) {
         this.merchantId = merchantId;
     }
 

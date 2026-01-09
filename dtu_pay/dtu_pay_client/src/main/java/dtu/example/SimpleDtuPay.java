@@ -35,7 +35,7 @@ public class SimpleDtuPay {
         return response.readEntity(String.class);
     }
 
-    public TransactionResult pay(Integer amount, String customerId, String merchantId) {
+    public TransactionResult pay(int amount, int customerId, int merchantId) {
         Transaction transaction = new Transaction(customerId, merchantId, amount);
         Response response = r.path("payments")
                     .request()
@@ -49,5 +49,17 @@ public class SimpleDtuPay {
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
                     .get(new GenericType<List<Transaction>>(){}); 
+    }
+
+    public Customer findCustomerById(int customerId) {
+        return r.path("customers")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .get(new GenericType<Customer>(){}); 
+    }
+
+    public void registerBankAccount(Customer customer, int balance) {
+        //BankClient bankClient = new BankClient();
+        //bankClient.registerCustomerAccount(customer, balance);
     }
 }

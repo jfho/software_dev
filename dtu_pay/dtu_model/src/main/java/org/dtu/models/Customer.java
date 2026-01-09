@@ -8,14 +8,21 @@ public class Customer {
     public Customer(String firstName) {
         this.firstName = firstName;
         this.lastName = "";
-        this.cpr = "";
     }
+        
     public Customer(String firstName, String lastName, String cpr) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.cpr = cpr;
     }
-    
+
+    public int getCustomerId() {
+        if (cpr != null && cpr.length() >= 4) {
+            return Integer.parseInt(cpr.substring(cpr.length() - 4));
+        }
+        return 0;
+    }
+
     public String getFirstName() {return firstName;}
     public String getLastName() {return lastName;}
     public String getCpr() {return cpr;}

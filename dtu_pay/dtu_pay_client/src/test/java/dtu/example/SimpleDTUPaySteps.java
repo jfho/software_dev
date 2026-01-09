@@ -115,13 +115,14 @@ public class SimpleDTUPaySteps {
         customerId = dtupay.register(customer);
     }
     
-    @Given("the customer is registered with the bank with an initial balance of {int} kr")
-    public void the_customer_is_registered_with_the_bank_with_an_initial_balance_of_kr(Integer int1) {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+    @Given("the customer {int} is registered with the bank with an initial balance of {int} kr")
+    public void the_customer_is_registered_with_the_bank_with_an_initial_balance_of_kr(int customerId, int balance) {
+        Customer customer = dtupay.findCustomerById(customerId);
+        dtupay.registerBankAccount(customer, balance);
     }
-    @Given("the customer is registered with Simple DTU Pay using their bank account")
-    public void the_customer_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+    
+    @Given("the customer {int} is registered with Simple DTU Pay using their bank account")
+    public void the_customer_is_registered_with_simple_dtu_pay_using_their_bank_account(int customerId) {
         // Write code here that turns the phrase above into concrete actions
         throw new io.cucumber.java.PendingException();
     }
@@ -130,13 +131,13 @@ public class SimpleDTUPaySteps {
         // Write code here that turns the phrase above into concrete actions
         throw new io.cucumber.java.PendingException();
     }
-    @Given("the merchant is registered with the bank with an initial balance of {int} kr")
-    public void the_merchant_is_registered_with_the_bank_with_an_initial_balance_of_kr(Integer int1) {
+    @Given("the merchant {int} is registered with the bank with an initial balance of {int} kr")
+    public void the_merchant_is_registered_with_the_bank_with_an_initial_balance_of_kr(int merchantId, int balance) {
         // Write code here that turns the phrase above into concrete actions
         throw new io.cucumber.java.PendingException();
     }
-    @Given("the merchant is registered with Simple DTU Pay using their bank account")
-    public void the_merchant_is_registered_with_simple_dtu_pay_using_their_bank_account() {
+    @Given("the merchant {int} is registered with Simple DTU Pay using their bank account")
+    public void the_merchant_is_registered_with_simple_dtu_pay_using_their_bank_account(int merchantId) {
         // Write code here that turns the phrase above into concrete actions
         throw new io.cucumber.java.PendingException();
     }
