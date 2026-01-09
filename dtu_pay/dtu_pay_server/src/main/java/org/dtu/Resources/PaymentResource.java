@@ -3,6 +3,7 @@ package org.dtu.Resources;
 import java.util.List;
 import java.math.BigDecimal;
 
+import org.dtu.Controllers.PaymentController;
 import org.dtu.Models.Database;
 import org.dtu.Models.Transaction;
 import dtu.ws.fastmoney.BankService;
@@ -18,24 +19,21 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/payments")
 public class PaymentResource {   
-    BankService_Service service = new BankService_Service();
-    BankService bank = service.getBankServicePort();
-    Database db = Database.getInstance();
+    PaymentController paymentController = PaymentController.getInstance();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void registerTransaction(Transaction transaction) {
         try {
-            bank.transferMoneyFromTo(transaction.customerId(), transaction.merchantId(), new BigDecimal(transaction.payment()), "Ordinary transfer");
+            paymentController.registerTransaction(transaction);
         } catch (BankServiceException_Exception e) {
            throw new BadRequestException("Transaction denied by the bank");
         }
-        db.addTransaction(transaction);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Transaction> getTransactions() {
-        return db.listTransactions();
+        return paymentController.getTransactions();
     }
 }

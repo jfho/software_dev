@@ -25,28 +25,32 @@ public class DtuPayClient {
 
 
 
-	public void register(Customer customer) {
-        r.path(CUSTOMERS_PATH)
+	public Customer register(Customer customer) {
+        Response res = r.path(CUSTOMERS_PATH)
                     .request()
                     .post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        
+        return res.readEntity(Customer.class);
 	}
 
-    public void register(Merchant merchant) {
-        r.path(MERCHANTS_PATH)
+    public Merchant register(Merchant merchant) {
+        Response res = r.path(MERCHANTS_PATH)
                     .request()
                     .post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
+
+        return res.readEntity(Merchant.class);
     }
 
     public void unregister(Customer customer) {
         r.path(CUSTOMERS_PATH)
-                    .path(String.valueOf(customer.username()))
+                    .path(String.valueOf(customer.dtupayUuid()))
                     .request()
                     .delete();
     }
 
     public void unregister(Merchant merchant) {
         r.path(MERCHANTS_PATH)
-                    .path(String.valueOf(merchant.username()))
+                    .path(String.valueOf(merchant.dtupayUuid()))
                     .request()
                     .delete();
     }
@@ -65,13 +69,11 @@ public class DtuPayClient {
                     .get(Merchant.class);
     }
 
-    public boolean pay(String customerUuid, String merchantUuid, BigDecimal amount) {
-        Transaction transaction = new Transaction(customerUuid, merchantUuid, amount);
-        Response res = r.path(PAYMENTS_PATH)
-                        .request()
-                        .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
-
-        return (res.getStatus() >= 200 && res.getStatus() < 300);
+    public void pay(String customerDtupayUuid, String merchantDtupayUuid, BigDecimal amount) {
+        Transaction transaction = new Transaction(customerDtupayUuid, merchantDtupayUuid, amount);
+        r.path(PAYMENTS_PATH)
+                    .request()
+                    .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
     }
 
     public List<Transaction> getPayments() {

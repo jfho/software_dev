@@ -1,5 +1,8 @@
 package org.dtu.Resources;
 
+import java.util.UUID;
+
+import org.dtu.Controllers.MerchantsController;
 import org.dtu.Models.Database;
 import org.dtu.Models.Merchant;
 
@@ -19,16 +22,13 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/merchants")
 public class MerchantResource {
-    BankService_Service service = new BankService_Service();
-    BankService bank = service.getBankServicePort();
-    
-    private final Database db = Database.getInstance();
+    private MerchantsController controller = new MerchantsController();
 
     @GET
-    @Path("/{username}")
+    @Path("/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Merchant getMerchant(@PathParam("username") String username) {
-        Merchant merchant = db.getMerchant(username);
+    public Merchant getMerchant(@PathParam("merchantId") String merchantId) {
+        Merchant merchant = controller.getMerchant(merchantId);
         if (merchant == null) {
             throw new NotFoundException("Merchant not found");
         }
@@ -37,20 +37,15 @@ public class MerchantResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void registerMerchant(Merchant merchant) {
-        try {
-            bank.getAccount(merchant.bankAccountUuid());
-        } catch (BankServiceException_Exception e) {
-            throw new BadRequestException("Invalid bank account");
-        }
-        
-        db.addMerchant(merchant);
+    @Produces(MediaType.APPLICATION_JSON)
+    public Merchant registerMerchant(Merchant merchant) {
+        return controller.registerMerchant(merchant);
     }
 
     @DELETE
-    @Path("/{username}")
+    @Path("/{merchantId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteMerchant(@PathParam("username") String username) {       
-        db.deleteMerchant(username);
+    public void deleteMerchant(@PathParam("merchantId") String merchantId) {       
+        controller.deleteMerchant(merchantId);
     }
 }
