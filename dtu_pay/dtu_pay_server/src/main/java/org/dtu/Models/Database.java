@@ -24,7 +24,7 @@ public class Database {
 
     // Customers
     public void addCustomer(Customer c) {
-        customers.put(c.customerId(), c);
+        customers.put(c.username(), c);
     }
 
     public Customer getCustomer(String id) {
@@ -39,9 +39,24 @@ public class Database {
         return List.copyOf(customers.values());
     }
 
+    /**
+     * Delete a customer by object. Returns true if the customer was removed.
+     */
+    public boolean deleteCustomer(Customer c) {
+        if (c == null) return false;
+        return customers.remove(c.username(), c);
+    }
+
+    /**
+     * Delete a customer by id. Returns true if the customer was removed.
+     */
+    public boolean deleteCustomer(String id) {
+        return customers.remove(id) != null;
+    }
+
     // Merchants
     public void addMerchant(Merchant m) {
-        merchants.put(m.merchantId(), m);
+        merchants.put(m.username(), m);
     }
 
     public Merchant getMerchant(String id) {
@@ -54,6 +69,21 @@ public class Database {
 
     public List<Merchant> listMerchants() {
         return List.copyOf(merchants.values());
+    }
+
+    /**
+     * Delete a merchant by object. Returns true if the merchant was removed.
+     */
+    public boolean deleteMerchant(Merchant m) {
+        if (m == null) return false;
+        return merchants.remove(m.username(), m);
+    }
+
+    /**
+     * Delete a merchant by id. Returns true if the merchant was removed.
+     */
+    public boolean deleteMerchant(String id) {
+        return merchants.remove(id) != null;
     }
 
     // Transactions

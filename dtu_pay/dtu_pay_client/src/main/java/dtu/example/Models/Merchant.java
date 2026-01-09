@@ -1,5 +1,5 @@
 package dtu.example.Models;
 
-public record Merchant(String merchantId) {
+public record Merchant(String bankAccountUuid, String username) {
 
 }

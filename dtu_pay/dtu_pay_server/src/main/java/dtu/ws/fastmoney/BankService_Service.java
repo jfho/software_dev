@@ -17,6 +17,7 @@ import jakarta.xml.ws.WebServiceFeature;
  * Generated source version: 3.0
  * 
  */
+@SuppressWarnings("deprecation")
 @WebServiceClient(name = "BankService", targetNamespace = "http://fastmoney.ws.dtu/", wsdlLocation = "http://fm-00.compute.dtu.dk/services/BankService?wsdl")
 public class BankService_Service
     extends Service

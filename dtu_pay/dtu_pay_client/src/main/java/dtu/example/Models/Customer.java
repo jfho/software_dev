@@ -1,5 +1,5 @@
 package dtu.example.Models;
 
-public record Customer(String customerId) {
+public record Customer(String bankAccountUuid, String username) {
 
 }
