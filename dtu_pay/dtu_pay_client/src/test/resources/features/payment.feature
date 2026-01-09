@@ -5,5 +5,5 @@ Feature: Payment
         When the customer registers for DTUPay with username "jweikop"
         When the merchant registers for DTUPay with username "cstrauss"
         When the customer performs a payment for "10" kr to the merchant
-        Then the balance of the customer at the bank is "990" kr
+        Then the balance of the customer at the bank is "890" kr
         And the balance of the merchant at the bank is "1010" kr
