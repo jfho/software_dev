@@ -3,25 +3,15 @@ package dtu;
 import dtu.Models.BankAccount;
 import dtu.ws.fastmoney.Account;
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import java.math.BigDecimal;
-
+import io.github.cdimascio.dotenv.Dotenv;
 import dtu.ws.fastmoney.BankService_Service;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
 
 public class BankClient {
-
-    private Client c = ClientBuilder.newClient();
-    private WebTarget r = c.target("http://localhost:8080/");
-    private String bankApiKey = "yacht7201";
-    
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    private String bankApiKey = dotenv.get("BANK_API_KEY");
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();
 
@@ -29,7 +19,7 @@ public class BankClient {
         try {
             return bank.getAccount(accountUuid);
         } catch (BankServiceException_Exception e) {
-            throw new BadRequestException("Cannot retrieve account");
+            throw new BadRequestException("Cannot retrieve account, error message: " + e.getMessage());
         }
     }
 
@@ -42,7 +32,7 @@ public class BankClient {
         try {
             return bank.createAccountWithBalance(bankApiKey, user, account.balance());
         } catch (BankServiceException_Exception e) {
-            throw new RuntimeException("Failed registering with the bank");
+            throw new RuntimeException("Failed registering with the bank, error message: " + e.getMessage());
         }
     }
 
@@ -50,7 +40,7 @@ public class BankClient {
         try {
             bank.retireAccount(bankApiKey, accountUuid);
         } catch (BankServiceException_Exception e) {
-            throw new RuntimeException("Failed unregistering with the bank");
+            throw new RuntimeException("Failed unregistering with the bank, error message: " + e.getMessage());
         }
     }
 }

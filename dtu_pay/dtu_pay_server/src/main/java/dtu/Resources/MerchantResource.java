@@ -1,15 +1,8 @@
 package dtu.Resources;
 
-import java.util.UUID;
-
 import dtu.Controllers.MerchantsController;
-import dtu.Models.Database;
 import dtu.Models.Merchant;
 
-import dtu.ws.fastmoney.BankService;
-import dtu.ws.fastmoney.BankServiceException_Exception;
-import dtu.ws.fastmoney.BankService_Service;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -45,7 +38,7 @@ public class MerchantResource {
     @DELETE
     @Path("/{merchantId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteMerchant(@PathParam("merchantId") String merchantId) {       
+    public void deleteMerchant(@PathParam("merchantId") String merchantId) {
         controller.deleteMerchant(merchantId);
     }
 }
