@@ -3,14 +3,15 @@ package dtu;
 import dtu.Models.BankAccount;
 import dtu.ws.fastmoney.Account;
 import jakarta.ws.rs.BadRequestException;
-
+import io.github.cdimascio.dotenv.Dotenv;
 import dtu.ws.fastmoney.BankService_Service;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
 
 public class BankClient {
-    private String bankApiKey = "yacht7201";
+    private static final Dotenv dotenv = Dotenv.load();
+    private String bankApiKey = dotenv.get("BANK_API_KEY");
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();
 
