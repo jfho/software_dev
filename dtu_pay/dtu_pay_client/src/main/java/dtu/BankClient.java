@@ -3,9 +3,6 @@ package dtu;
 import dtu.Models.BankAccount;
 import dtu.ws.fastmoney.Account;
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.WebTarget;
 
 import dtu.ws.fastmoney.BankService_Service;
 import dtu.ws.fastmoney.BankServiceException_Exception;
@@ -13,11 +10,7 @@ import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
 
 public class BankClient {
-
-    private Client c = ClientBuilder.newClient();
-    private WebTarget r = c.target("http://localhost:8080/");
     private String bankApiKey = "yacht7201";
-
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();
 
