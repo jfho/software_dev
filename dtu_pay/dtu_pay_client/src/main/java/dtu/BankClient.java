@@ -10,7 +10,7 @@ import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
 
 public class BankClient {
-    private static final Dotenv dotenv = Dotenv.load();
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
     private String bankApiKey = dotenv.get("BANK_API_KEY");
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();

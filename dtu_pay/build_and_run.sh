@@ -7,7 +7,7 @@ mvn clean package
 # Create a new docker image if necessary.
 docker compose build
 # Restarts the container with the new image if necessary
-docker compose up -d
+docker compose up -d --remove-orphans
 # The server stays running.
 # To terminate the server run docker-compose down in the
 # simple-rest directory
