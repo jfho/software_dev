@@ -5,11 +5,7 @@ import dtu.ws.fastmoney.Account;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import java.math.BigDecimal;
 
 import dtu.ws.fastmoney.BankService_Service;
 import dtu.ws.fastmoney.BankServiceException_Exception;
@@ -21,7 +17,7 @@ public class BankClient {
     private Client c = ClientBuilder.newClient();
     private WebTarget r = c.target("http://localhost:8080/");
     private String bankApiKey = "yacht7201";
-    
+
     BankService_Service service = new BankService_Service();
     BankService bank = service.getBankServicePort();
 
@@ -29,7 +25,7 @@ public class BankClient {
         try {
             return bank.getAccount(accountUuid);
         } catch (BankServiceException_Exception e) {
-            throw new BadRequestException("Cannot retrieve account");
+            throw new BadRequestException("Cannot retrieve account, error message: " + e.getMessage());
         }
     }
 
@@ -42,7 +38,7 @@ public class BankClient {
         try {
             return bank.createAccountWithBalance(bankApiKey, user, account.balance());
         } catch (BankServiceException_Exception e) {
-            throw new RuntimeException("Failed registering with the bank");
+            throw new RuntimeException("Failed registering with the bank, error message: " + e.getMessage());
         }
     }
 
@@ -50,7 +46,7 @@ public class BankClient {
         try {
             bank.retireAccount(bankApiKey, accountUuid);
         } catch (BankServiceException_Exception e) {
-            throw new RuntimeException("Failed unregistering with the bank");
+            throw new RuntimeException("Failed unregistering with the bank, error message: " + e.getMessage());
         }
     }
 }

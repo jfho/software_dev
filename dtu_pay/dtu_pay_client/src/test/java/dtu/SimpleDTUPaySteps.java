@@ -17,6 +17,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
 public class SimpleDTUPaySteps {
     private DtuPayClient dtupay = new DtuPayClient();
@@ -27,6 +28,8 @@ public class SimpleDTUPaySteps {
 
     private Customer customer = null;
     private Merchant merchant = null;
+
+    Response response;
 
     @Before
     public void setup() {
@@ -48,7 +51,8 @@ public class SimpleDTUPaySteps {
     }
 
     @Given("a customer bank account with first name {string}, last name {string}, CPR {string}, and balance {string}")
-    public void a_customer_bank_account_with_first_name_last_name_cpr_and_balance(String firstName, String lastName, String cpr, String balance) {
+    public void a_customer_bank_account_with_first_name_last_name_cpr_and_balance(String firstName, String lastName,
+            String cpr, String balance) {
         BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
         customerUuid = bank.register(account);
     }
@@ -61,13 +65,15 @@ public class SimpleDTUPaySteps {
     }
 
     @When("the customer registers for DTUPay with first name {string}, last name {string}, CPR {string}")
-    public void the_customer_registers_for_dtu_pay_with_first_name_last_name_cpr(String firstName, String lastName, String cpr) {
+    public void the_customer_registers_for_dtu_pay_with_first_name_last_name_cpr(String firstName, String lastName,
+            String cpr) {
         customer = new Customer(firstName, lastName, cpr, customerUuid, null);
         customer = dtupay.register(customer);
     }
 
-   @When("the merchant registers for DTUPay with first name {string}, last name {string}, CPR {string}")
-    public void the_merchant_registers_for_dtu_pay_with_first_name_last_name_cpr(String firstName, String lastName, String cpr) {
+    @When("the merchant registers for DTUPay with first name {string}, last name {string}, CPR {string}")
+    public void the_merchant_registers_for_dtu_pay_with_first_name_last_name_cpr(String firstName, String lastName,
+            String cpr) {
         merchant = new Merchant(firstName, lastName, cpr, merchantUuid, null);
         merchant = dtupay.register(merchant);
     }
@@ -136,11 +142,34 @@ public class SimpleDTUPaySteps {
     public void the_list_contains_payments_where_the_customer_paid_kr_to_the_merchant(String amount) {
         boolean containsPayment = false;
         for (Transaction transaction : transactionsList) {
-            if (transaction.payment().equals(new BigDecimal(amount)) && transaction.customerId().equals(customer.dtupayUuid()) && transaction.merchantId().equals(merchant.dtupayUuid())) {
+            if (transaction.payment().equals(new BigDecimal(amount))
+                    && transaction.customerId().equals(customer.dtupayUuid())
+                    && transaction.merchantId().equals(merchant.dtupayUuid())) {
                 containsPayment = true;
                 break;
             }
         }
         assertTrue(containsPayment);
+    }
+
+    @When("the merchant initiates a payment for {string} kr using customer id {string}")
+    public void the_merchant_initiates_a_payment_for_kr_using_customer_id(String amount, String customerId) {
+        response = dtupay.pay(customerId, merchant.dtupayUuid(), new BigDecimal(amount));
+    }
+
+    @When("the customer initiates a payment for {string} kr using merchant id {string}")
+    public void the_customer_initiates_a_payment_for_kr_using_merchant_id(String amount, String merchantId) {
+        response = dtupay.pay(customer.dtupayUuid(), merchantId, new BigDecimal(amount));
+    }
+
+    @Then("the payment is not successful")
+    public void the_payment_is_not_successful() {
+        assertTrue(response.getStatus() >= 400 && response.getStatus() <= 499);
+    }
+
+    @Then("an error message is returned saying {string}")
+    public void an_error_message_is_returned_saying(String message) {
+        String error = response.readEntity(String.class);
+        assertTrue(error.equals(message));
     }
 }
