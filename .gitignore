@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,java,maven
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,java,maven
 
+# Environment variables
+.env
+
 ### Java ###
 # Compiled class file
 *.class

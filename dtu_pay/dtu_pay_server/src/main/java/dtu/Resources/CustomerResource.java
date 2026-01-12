@@ -1,15 +1,8 @@
 package dtu.Resources;
 
-import java.util.UUID;
-
 import dtu.Controllers.CustomerController;
 import dtu.Models.Customer;
-import dtu.Models.Database;
 
-import dtu.ws.fastmoney.BankService;
-import dtu.ws.fastmoney.BankServiceException_Exception;
-import dtu.ws.fastmoney.BankService_Service;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -21,7 +14,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/customers")
-public class CustomerResource {   
+public class CustomerResource {
     CustomerController controller = new CustomerController();
 
     @GET
@@ -47,7 +40,7 @@ public class CustomerResource {
     @DELETE
     @Path("/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteCustomer(@PathParam("customerId") String customerId) {       
+    public void deleteCustomer(@PathParam("customerId") String customerId) {
         controller.deleteCustomer(customerId);
     }
 }

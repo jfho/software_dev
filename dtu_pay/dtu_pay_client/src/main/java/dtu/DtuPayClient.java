@@ -41,15 +41,15 @@ public class DtuPayClient {
         return res.readEntity(Merchant.class);
     }
 
-    public void unregister(Customer customer) {
-        r.path(CUSTOMERS_PATH)
+    public Response unregister(Customer customer) {
+        return r.path(CUSTOMERS_PATH)
                     .path(String.valueOf(customer.dtupayUuid()))
                     .request()
                     .delete();
     }
 
-    public void unregister(Merchant merchant) {
-        r.path(MERCHANTS_PATH)
+    public Response unregister(Merchant merchant) {
+        return r.path(MERCHANTS_PATH)
                     .path(String.valueOf(merchant.dtupayUuid()))
                     .request()
                     .delete();
@@ -69,9 +69,9 @@ public class DtuPayClient {
                     .get(Merchant.class);
     }
 
-    public void pay(String customerDtupayUuid, String merchantDtupayUuid, BigDecimal amount) {
+    public Response pay(String customerDtupayUuid, String merchantDtupayUuid, BigDecimal amount) {
         Transaction transaction = new Transaction(customerDtupayUuid, merchantDtupayUuid, amount);
-        r.path(PAYMENTS_PATH)
+        return r.path(PAYMENTS_PATH)
                     .request()
                     .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
     }
