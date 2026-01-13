@@ -1,7 +1,6 @@
 package dtu.Controllers;
 
 import java.util.UUID;
-
 import dtu.Models.Merchant;
 import dtu.Models.Database;
 
@@ -9,8 +8,7 @@ public class MerchantsController {
     private final Database db = Database.getInstance();
 
     public Merchant getMerchant(String MerchantId) {
-        Merchant merchant = db.getMerchant(MerchantId);
-        return merchant;
+        return db.getMerchant(MerchantId);
     }
 
     public Merchant registerMerchant(Merchant merchant) {
@@ -22,5 +20,9 @@ public class MerchantsController {
     
     public void deleteMerchant(String id) {
         db.deleteMerchant(id);
+    }
+
+    public boolean hasMerchant(String id) {
+        return db.hasMerchant(id);
     }
 }
