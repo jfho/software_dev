@@ -14,8 +14,8 @@ public class MerchantsController {
     private final Database db = Database.getInstance();
     MessageQueue queue;
 
-    private String PAYMENT_REQUEST_KEY = "payments.merchantbankaccount.request";
-    private String PAYMENT_RESPONSE_KEY = "payments.merchantbankaccount.response";
+    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
+    private String BANKACCOUNT_MERCHANT_RES_RK = "payments.merchantbankaccount.response";
     private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
 
     private static final Logger LOG = Logger.getLogger(CustomerController.class);
@@ -23,7 +23,7 @@ public class MerchantsController {
     public MerchantsController(MessageQueue q) {
         queue = q;
 
-        queue.addHandler(PAYMENT_REQUEST_KEY, e -> {
+        queue.addHandler(BANKACCOUNT_MERCHANT_REQ_RK, e -> {
             LOG.info("RabbitConsumer received message");
             String accountId = e.getArgument(0, String.class);
             String corrId = e.getArgument(1, String.class);
@@ -33,7 +33,7 @@ public class MerchantsController {
                 bankAccountId = db.getMerchant(accountId).bankAccountUuid();
             }
 
-            queue.publish(new Event(PAYMENT_RESPONSE_KEY, new Object[] { bankAccountId, corrId } ));
+            queue.publish(new Event(BANKACCOUNT_MERCHANT_RES_RK, new Object[] { bankAccountId, corrId } ));
 		});
     }
 

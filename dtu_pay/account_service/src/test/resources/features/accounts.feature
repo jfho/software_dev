@@ -36,3 +36,15 @@ Feature: Account service
         When the merchant unregisters for DTUPay
         Then the merchant unregistration is successful
         And the merchant deletion event is received
+    
+    Scenario: Retrieve bank ID associated with customer ID
+        Given a customer account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
+        And a subscriber for the customer bank account response event
+        When a bank account request for the customer with correlation ID "42424242" is emitted
+        Then a bank account response for the customer with bank ID "12345678" and correlation ID "42424242" is emitted
+
+    Scenario: Retrieve bank ID associated with merchant ID
+        Given a merchant account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
+        And a subscriber for the merchant bank account response event
+        When a bank account request for the merchant with correlation ID "42424242" is emitted
+        Then a bank account response for the merchant with bank ID "12345678" and correlation ID "42424242" is emitted
