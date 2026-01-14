@@ -15,7 +15,7 @@ public class CustomerController {
     MessageQueue queue;
 
     private String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private String BANKACCOUNT_CUSTOMER_RES_RK = "payments.customerbankaccount.response";
+    private String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
     private String DELETE_CUSTOMER_RK = "accounts.customer.deleted";
 
     private static final Logger LOG = Logger.getLogger(CustomerController.class);
