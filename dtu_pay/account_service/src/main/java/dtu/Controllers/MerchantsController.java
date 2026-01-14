@@ -16,7 +16,7 @@ public class MerchantsController {
 
     private String PAYMENT_REQUEST_KEY = "payments.merchantbankaccount.request";
     private String PAYMENT_RESPONSE_KEY = "payments.merchantbankaccount.response";
-    private String DELETE_USER_RK = "accounts.customer.deleted";
+    private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
 
     private static final Logger LOG = Logger.getLogger(CustomerController.class);
 
@@ -37,8 +37,12 @@ public class MerchantsController {
 		});
     }
 
-    public Merchant getMerchant(String MerchantId) {
-        return db.getMerchant(MerchantId);
+    public Merchant getMerchant(String merchantId) {
+        Merchant merchant = db.getMerchant(merchantId);
+        if (merchant == null) {
+            throw new NotFoundException("merchant not found");
+        }
+        return merchant;
     }
 
     public Merchant registerMerchant(Merchant merchant) {
@@ -54,7 +58,7 @@ public class MerchantsController {
         }
         
         db.deleteMerchant(id);
-        queue.publish(new Event(DELETE_USER_RK, new Object[] { id }));
+        queue.publish(new Event(DELETE_MERCHANT_RK, new Object[] { id }));
     }
 
     public boolean hasMerchant(String id) {

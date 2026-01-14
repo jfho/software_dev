@@ -16,7 +16,7 @@ public class CustomerController {
 
     private String PAYMENT_REQUEST_KEY = "payments.customerbankaccount.request";
     private String PAYMENT_RESPONSE_KEY = "payments.customerbankaccount.response";
-    private String DELETE_USER_RK = "accounts.customer.deleted";
+    private String DELETE_CUSTOMER_RK = "accounts.customer.deleted";
 
     private static final Logger LOG = Logger.getLogger(CustomerController.class);
 
@@ -26,19 +26,23 @@ public class CustomerController {
         queue.addHandler(PAYMENT_REQUEST_KEY, e -> {
             LOG.info("RabbitConsumer received message");
             String accountId = e.getArgument(0, String.class);
+            String corrId = e.getArgument(1, String.class);
 
+            String bankAccountId = null;
             if (db.hasCustomer(accountId)) {
-                String bankAccountId = db.getCustomer(accountId).bankAccountUuid();
-                queue.publish(new Event(PAYMENT_RESPONSE_KEY, new Object[] { bankAccountId } ));
-                return;
+                bankAccountId = db.getCustomer(accountId).bankAccountUuid();
             }
 
-            queue.publish(new Event(PAYMENT_RESPONSE_KEY, new Object[] { null } ));
+            queue.publish(new Event(PAYMENT_RESPONSE_KEY, new Object[] { bankAccountId, corrId } ));
 		});
     }
 
     public Customer getCustomer(String customerId) {
-        return db.getCustomer(customerId);
+        Customer customer = db.getCustomer(customerId);
+        if (customer == null) {
+            throw new NotFoundException("merchant not found");
+        }
+        return customer;
     }
 
     public Customer registerCustomer(Customer customer) {
@@ -54,7 +58,7 @@ public class CustomerController {
         }
         
         db.deleteCustomer(id);
-        queue.publish(new Event(DELETE_USER_RK, new Object[] { id }));
+        queue.publish(new Event(DELETE_CUSTOMER_RK, new Object[] { id }));
     }
 
     public boolean hasCustomer(String id) {

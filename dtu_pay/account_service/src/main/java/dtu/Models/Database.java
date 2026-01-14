@@ -69,4 +69,9 @@ public class Database {
     public boolean deleteMerchant(String id) {
         return merchants.remove(id) != null;
     }
+    
+    public void clean() {
+        customers.clear();
+        merchants.clear();
+    }
 }

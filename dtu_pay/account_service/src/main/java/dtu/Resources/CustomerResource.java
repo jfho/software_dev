@@ -7,7 +7,6 @@ import dtu.Models.Customer;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -22,13 +21,7 @@ public class CustomerResource {
     @Path("/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Customer getCustomer(@PathParam("customerId") String customerId) {
-        Customer customer = controller.getCustomer(customerId);
-
-        if (customer == null) {
-            throw new NotFoundException("Customer not found");
-        }
-
-        return customer;
+        return controller.getCustomer(customerId);
     }
 
     @POST
