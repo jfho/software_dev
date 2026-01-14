@@ -1,9 +1,7 @@
 package dtu.Resources;
 
-import java.io.IOException;
-
 import dtu.Controllers.CustomerController;
-import dtu.Messaging.RabbitMq;
+import dtu.MessagingUtils.implementations.RabbitMqQueue;
 import dtu.Models.Customer;
 
 import jakarta.ws.rs.Consumes;
@@ -18,8 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/customers")
 public class CustomerResource {
-    CustomerController controller = new CustomerController();
-    RabbitMq rabbitmqClient = RabbitMq.getInstance();
+    CustomerController controller = new CustomerController(new RabbitMqQueue());
 
     @GET
     @Path("/{customerId}")
@@ -45,16 +42,6 @@ public class CustomerResource {
     @Path("/{customerId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public void deleteCustomer(@PathParam("customerId") String customerId) {
-        if (!controller.hasCustomer(customerId)) {
-            throw new NotFoundException("Error deleting customer: customer not found");
-        }
-        
         controller.deleteCustomer(customerId);
-
-        try {
-            rabbitmqClient.publishUserDeletedEvent(customerId);
-        } catch (IOException e) {
-            throw new InternalError("Problem occurred connecting to RabbitMQ.");
-        }
     }
 }

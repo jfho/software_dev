@@ -1,9 +1,7 @@
 package dtu.Resources;
 
-import java.io.IOException;
-
 import dtu.Controllers.MerchantsController;
-import dtu.Messaging.RabbitMq;
+import dtu.MessagingUtils.implementations.RabbitMqQueue;
 import dtu.Models.Merchant;
 
 import jakarta.ws.rs.Consumes;
@@ -18,18 +16,18 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/merchants")
 public class MerchantResource {
-    private MerchantsController controller = new MerchantsController();
-    RabbitMq rabbitmqClient = RabbitMq.getInstance();
-
+    MerchantsController controller = new MerchantsController(new RabbitMqQueue());
 
     @GET
     @Path("/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Merchant getMerchant(@PathParam("merchantId") String merchantId) {
         Merchant merchant = controller.getMerchant(merchantId);
+
         if (merchant == null) {
             throw new NotFoundException("Merchant not found");
         }
+
         return merchant;
     }
 
@@ -44,16 +42,6 @@ public class MerchantResource {
     @Path("/{merchantId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public void deleteMerchant(@PathParam("merchantId") String merchantId) {
-        if (!controller.hasMerchant(merchantId)) {
-            throw new NotFoundException("Error deleting merchant: merchant not found");
-        }
-        
         controller.deleteMerchant(merchantId);
-
-        try {
-            rabbitmqClient.publishUserDeletedEvent(merchantId);
-        } catch (IOException e) {
-            throw new InternalError("Problem occurred connecting to RabbitMQ.");
-        }
     }
 }
