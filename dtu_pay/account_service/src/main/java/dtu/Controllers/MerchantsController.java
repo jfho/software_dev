@@ -1,14 +1,48 @@
 package dtu.Controllers;
 
 import java.util.UUID;
+
+import org.jboss.logging.Logger;
+
 import dtu.Models.Merchant;
+import jakarta.ws.rs.NotFoundException;
+import dtu.MessagingUtils.Event;
+import dtu.MessagingUtils.MessageQueue;
 import dtu.Models.Database;
 
 public class MerchantsController {
     private final Database db = Database.getInstance();
+    MessageQueue queue;
 
-    public Merchant getMerchant(String MerchantId) {
-        return db.getMerchant(MerchantId);
+    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
+    private String BANKACCOUNT_MERCHANT_RES_RK = "payments.merchantbankaccount.response";
+    private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
+
+    private static final Logger LOG = Logger.getLogger(CustomerController.class);
+
+    public MerchantsController(MessageQueue q) {
+        queue = q;
+
+        queue.addHandler(BANKACCOUNT_MERCHANT_REQ_RK, e -> {
+            LOG.info("RabbitConsumer received message");
+            String accountId = e.getArgument(0, String.class);
+            String corrId = e.getArgument(1, String.class);
+
+            String bankAccountId = null;
+            if (db.hasMerchant(accountId)) {
+                bankAccountId = db.getMerchant(accountId).bankAccountUuid();
+            }
+
+            queue.publish(new Event(BANKACCOUNT_MERCHANT_RES_RK, new Object[] { bankAccountId, corrId } ));
+		});
+    }
+
+    public Merchant getMerchant(String merchantId) {
+        Merchant merchant = db.getMerchant(merchantId);
+        if (merchant == null) {
+            throw new NotFoundException("merchant not found");
+        }
+        return merchant;
     }
 
     public Merchant registerMerchant(Merchant merchant) {
@@ -19,7 +53,12 @@ public class MerchantsController {
     }
     
     public void deleteMerchant(String id) {
+        if (!db.hasMerchant(id)) {
+            throw new NotFoundException("Merchant not found");
+        }
+        
         db.deleteMerchant(id);
+        queue.publish(new Event(DELETE_MERCHANT_RK, new Object[] { id }));
     }
 
     public boolean hasMerchant(String id) {
