@@ -15,13 +15,6 @@ public class TokenResource {
     private TokenController controller = new TokenController();
 
     @GET
-    @Path("/test")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String tester() {
-        return "Hi, am working";
-    }
-
-    @GET
     @Path("/customer/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> getTokensByCustomerID(@PathParam("customerId") String customerId) {
@@ -32,13 +25,13 @@ public class TokenResource {
     @Path("/customer/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> createTokens(@PathParam("customerId") String customerId) {
-        return controller.createToken(customerId);
+        return controller.createTokens(customerId, 6); //INIT finegrain control of tokens to create
     }
 
     @GET
     @Path("/token/{tokenId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public boolean validateToken(@PathParam("tokenId") String tokenId) {
+    public String validateToken(@PathParam("tokenId") String tokenId) {
         return controller.validateToken(tokenId);
     }
 

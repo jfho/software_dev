@@ -26,27 +26,39 @@ public class TokenController {
         }
     }
 
-    public List<String> createToken(String customerID) {
-        // return existing if present
+    public List<String> createTokens(String customerID, int amount) {
+        // return existing if present or too large
         List<String> existing = tokenMap.get(customerID);
-        if (existing != null) {
+        if (existing != null && existing.size() > 1) {
             return existing;
         }
 
         // initialize a thread-safe list
-        List<String> initTokens = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < 6; i++) {
+        List<String> generatedTokens = new CopyOnWriteArrayList<>();
+        
+        int amountOfTokensToGenerate = Integer.min(6, amount);
+
+        for (int i = 0; i < amountOfTokensToGenerate; i++) {
             String t = createTokenID();
-            initTokens.add(t);
+            generatedTokens.add(t);
             tokenToCustomer.put(t, customerID);
         }
 
-        List<String> prev = tokenMap.putIfAbsent(customerID, initTokens);
-        return prev == null ? initTokens : prev;
+        tokenMap.put(customerID, generatedTokens);
+        return generatedTokens;
     }
 
-    public boolean validateToken(String tokenID) {
-        return tokenToCustomer.containsKey(tokenID);
+    public String validateToken(String tokenID) {
+        // Pop customerId or null
+        String customerId = tokenToCustomer.remove(tokenID);
+
+        // Remove tokenId from customer 
+        if (customerId != null) {
+            tokenMap.get(customerId).remove(tokenID);
+        }
+
+        // return customerId or null
+        return customerId;
     }
 
     public List<String> getAllTokensByCustomer(String customerID) {
@@ -57,22 +69,13 @@ public class TokenController {
         return tokenToCustomer.get(tokenId);
     }
 
-    public List<String> createTokenHELPER(String customerID, int amount) {
-        // return existing if present
-        List<String> existing = tokenMap.get(customerID);
-        if (existing != null) {
-            return existing;
-        }
-
-        // initialize a thread-safe list
-        List<String> initTokens = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            String t = createTokenID();
-            initTokens.add(t);
-            tokenToCustomer.put(t, customerID);
-        }
-
-        List<String> prev = tokenMap.putIfAbsent(customerID, initTokens);
-        return prev == null ? initTokens : prev;
+    public void clearData() {
+        // customerId -> list of tokenIds
+        tokenMap.clear();
+        // tokenId -> customerId
+        tokenToCustomer.clear();
+        // global set of tokenIds to avoid collisions
+        tokens.clear();
     }
+
 }
