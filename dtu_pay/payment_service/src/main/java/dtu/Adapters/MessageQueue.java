@@ -1,6 +1,10 @@
 package dtu.Adapters;
 
+import java.util.function.Consumer;
+
 public interface MessageQueue {
-	void produce(String message, String routingKey);
-	String consume(String routingKey) throws Exception;
+
+	void publish(Event event);
+	void addHandler(String topic, Consumer<Event> handler);
+
 }

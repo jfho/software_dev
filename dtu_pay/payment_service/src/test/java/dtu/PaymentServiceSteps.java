@@ -3,7 +3,9 @@ package dtu;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 
+import dtu.Adapters.Event;
 import dtu.Adapters.MessageQueue;
 import dtu.Models.Transaction;
 import io.cucumber.java.en.Given;
@@ -31,20 +33,20 @@ public class PaymentServiceSteps {
 
     @Given("the customer has id {string}")
     public void the_customer_has_id(String customerId) {
-        this.customerId = customerId;
-        mq.produce(customerId, "token.customerid.response");
+        Event event = new Event("token.customerid.response", new Object[] { customerId });
+        mq.publish(event);
     }
 
     @Given("customer bank account with id {string}")
     public void customer_bank_account_with_id(String customerBankAccount) {
-        this.customerBankAccount = customerBankAccount;
-        mq.produce(customerBankAccount, "account.customerbankaccount.response");
+        Event event = new Event("account.customerbankaccount.response", new Object[] { customerBankAccount });
+        mq.publish(event);
     }
 
     @Given("merchant bank account with id {string}")
     public void merchant_bank_account_with_id(String merchantBankAccount) {
-        this.merchantBankAccount = merchantBankAccount;
-        mq.produce(merchantBankAccount, "account.merchantbankaccount.response");
+        Event event = new Event("account.merchantbankaccount.response", new Object[] { merchantBankAccount });
+        mq.publish(event);
     }
 
     @When("we register the transaction")
@@ -54,7 +56,12 @@ public class PaymentServiceSteps {
 
     @Then("the {string} queue has one element with string {string}")
     public void the_queue_has_element_with_string(String routingKey, String expectedMessage) throws Exception {
-        String actualMessage = mq.consume(routingKey);
+        CompletableFuture<String> actualMessageFuture = new CompletableFuture<>();
+        mq.addHandler(routingKey, event -> {
+            String response = event.getArgument(0, String.class);
+            actualMessageFuture.complete(response);
+        });
+        String actualMessage = actualMessageFuture.join();
         assertTrue(actualMessage.equals(expectedMessage));
     }
 }
