@@ -15,7 +15,7 @@ public class CustomerController {
     MessageQueue queue;
 
     private String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private String BANKACCOUNT_CUSTOMER_RES_RK = "payments.customerbankaccount.response";
+    private String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
     private String DELETE_CUSTOMER_RK = "accounts.customer.deleted";
 
     private static final Logger LOG = Logger.getLogger(CustomerController.class);
@@ -24,9 +24,10 @@ public class CustomerController {
         queue = q;
 
         queue.addHandler(BANKACCOUNT_CUSTOMER_REQ_RK, e -> {
-            LOG.info("RabbitConsumer received message");
+            LOG.info("account service received bank account request");
             String accountId = e.getArgument(0, String.class);
             String corrId = e.getArgument(1, String.class);
+            LOG.info("accountId: " + accountId + ", corrId: " + corrId);
 
             String bankAccountId = null;
             if (db.hasCustomer(accountId)) {
