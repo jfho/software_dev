@@ -3,7 +3,7 @@ package dtu.Resources;
 import java.io.IOException;
 
 import dtu.Controllers.CustomerController;
-import dtu.Controllers.RabbitMq;
+import dtu.Messaging.RabbitMq;
 import dtu.Models.Customer;
 
 import jakarta.ws.rs.Consumes;

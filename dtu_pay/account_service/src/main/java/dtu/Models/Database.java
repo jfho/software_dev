@@ -3,7 +3,6 @@ package dtu.Models;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *  Simple in-memory database, emulating a real database.
