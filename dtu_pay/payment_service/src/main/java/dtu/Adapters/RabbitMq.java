@@ -1,13 +1,14 @@
-package dtu.Controllers;
+package dtu.Adapters;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class RabbitMq {
+public class RabbitMq implements MessageQueue {
     private static final RabbitMq INSTANCE = new RabbitMq();
 
     private final Connection connection;

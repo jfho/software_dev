@@ -1,6 +1,6 @@
-package dtu.Resources;
+package dtu.Adapters;
 
-import dtu.Controllers.PaymentController;
+import dtu.PaymentService;
 import dtu.Models.Transaction;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -9,7 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/payments")
 public class PaymentResource {
-    PaymentController paymentController = PaymentController.getInstance();
+    PaymentService paymentController = new PaymentService(RabbitMq.getInstance(), new BankClient());
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
