@@ -1,6 +1,9 @@
 package dtu;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import dtu.Adapters.BankClientInterface;
 import dtu.Adapters.Event;
@@ -11,44 +14,40 @@ public class PaymentService {
     MessageQueue mq;
     BankClientInterface bankClient;
 
-    private CompletableFuture<String> customerIdFuture;
-    private CompletableFuture<String> customerBankIdFuture;
-    private CompletableFuture<String> merchantBankIdFuture;
+    private Map<String, CompletableFuture<String>> pendingRequests = new ConcurrentHashMap<>();
 
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
         this.bankClient = bankClient;
 
-        mq.addHandler("token.customerid.response", event -> {
-            if (customerIdFuture != null) {
-                String id = event.getArgument(0, String.class);
-                customerIdFuture.complete(id);
-            }
-        });
+        this.mq.addHandler("token.customerid.response", this::handleResponse);
+        this.mq.addHandler("account.customerbankaccount.response", this::handleResponse);
+        this.mq.addHandler("account.merchantbankaccount.response", this::handleResponse);
+    }
 
-        mq.addHandler("account.customerbankaccount.response", event -> {
-            if (customerBankIdFuture != null) {
-                String id = event.getArgument(0, String.class);
-                customerBankIdFuture.complete(id);
-            }
-        });
+    public void handleResponse(Event event) {
+        String result = event.getArgument(0, String.class);
+        String correlationId = event.getArgument(1, String.class);
 
-        mq.addHandler("account.merchantbankaccount.response", event -> {
-            if (merchantBankIdFuture != null) {
-                String id = event.getArgument(0, String.class);
-                merchantBankIdFuture.complete(id);
-            }
-        });
+        CompletableFuture<String> future = pendingRequests.remove(correlationId);
+
+        if (future != null) {
+            future.complete(result);
+        } else {
+            throw new RuntimeException();
+        }
     }
 
     private String getCustomerIdFromToken(String tokenId) throws Exception {
-        // 2. passes the token to the token manager done
-        customerIdFuture = new CompletableFuture<>();
-        Event event = new Event("payments.customerid.request", new Object[] { tokenId });
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<String> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+
+        Event event = new Event("payments.customerid.request", new Object[] { tokenId, correlationId });
         mq.publish(event);
 
         // 3. consumes the customer id from the token manager done
-        String customerId = customerIdFuture.join();
+        String customerId = future.join();
 
         // 4. if not null, send the customer id and the merchant id to the account done
         if (customerId.isEmpty()) {
@@ -58,19 +57,15 @@ public class PaymentService {
     }
 
     public String getBankAccountIdById(String dtuPayId, String routingKey) throws Exception {
-        CompletableFuture<String> bankIdFuture = new CompletableFuture<>();
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<String> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
 
-        Event event = new Event("payments." + routingKey + ".request", new Object[] { dtuPayId });
+        Event event = new Event("payments." + routingKey + ".request", new Object[] { dtuPayId, correlationId });
         mq.publish(event);
 
-        if (routingKey.equals("customerbankaccount")) {
-            this.customerBankIdFuture = bankIdFuture;
-        } else if (routingKey.equals("merchantbankaccount")) {
-            this.merchantBankIdFuture = bankIdFuture;
-        }
-
         // 5. consumes the bank account if not null
-        String bankAccountId = bankIdFuture.join();
+        String bankAccountId = future.join();
 
         if (bankAccountId.isEmpty()) {
             throw new Exception("Unknown customer or merchant");
@@ -85,12 +80,6 @@ public class PaymentService {
         String customerBankAccountId = getBankAccountIdById(customerId, "customerbankaccount");
         String merchantBankAccountId = getBankAccountIdById(transaction.merchantId(), "merchantbankaccount");
 
-        if (customerBankAccountId.isEmpty() || merchantBankAccountId.isEmpty()) {
-            throw new Exception("Unknown customer or merchant");
-        }
-
-        // 6. passes the bank account to the ba nk service along with the amount to
-        // transfer
         boolean transferSuccessful = bankClient.transfer(customerBankAccountId, merchantBankAccountId,
                 transaction.amount());
 
