@@ -87,7 +87,7 @@ public class PaymentService {
             // 7. send the transaction to the reporting service
             String reportMessage = customerId + "," + transaction.merchantId() + "," + transaction.amount().toString();
             mq.publish(new Event("payments.transaction.report", new Object[] { reportMessage }));
-            mq.publish(new Event("payments.transaction.status", new Object[] { "Bank transaction succesful" }));
+            mq.publish(new Event("payments.transaction.status", new Object[] { "Bank transaction successful" }));
         } else {
             mq.publish(new Event("payments.transaction.status", new Object[] { "Bank transaction failed" }));
         }
