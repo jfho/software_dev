@@ -15,9 +15,9 @@ public class MerchantsController {
 
     public Merchant registerMerchant(Merchant merchant) {
         String dtupayUuid = UUID.randomUUID().toString();
-        Merchant registeredCustomer = new Merchant(merchant.firstName(), merchant.lastName(), merchant.cpr(), merchant.bankAccountUuid(), dtupayUuid);
-        db.addMerchant(registeredCustomer);
-        return registeredCustomer;
+        Merchant registeredMerchant = new Merchant(merchant.firstName(), merchant.lastName(), merchant.cpr(), merchant.bankAccountUuid(), dtupayUuid);
+        db.addMerchant(registeredMerchant);
+        return registeredMerchant;
     }
     
     public void deleteMerchant(String id) {
