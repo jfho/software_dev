@@ -26,6 +26,8 @@ services:
     container_name: account_service
     networks:
       - dtupay_internal
+    depends_on:
+      - rabbitmq
 
   reporting_service:
     build: ./reporting_service
