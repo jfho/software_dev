@@ -37,10 +37,10 @@ public class AccountServiceSteps {
 
     private String DELETE_CUSTOMER_RK = "accounts.customer.deleted";
     private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
-    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
-    private String BANKACCOUNT_MERCHANT_RES_RK = "payments.merchantbankaccount.response";
     private String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private String BANKACCOUNT_CUSTOMER_RES_RK = "payments.customerbankaccount.response";
+    private String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
+    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
+    private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
 
     @Before
     public void setup() {
