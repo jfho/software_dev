@@ -9,11 +9,11 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/payments")
 public class PaymentResource {
-    PaymentService paymentController = new PaymentService(RabbitMq.getInstance(), new BankClient());
+    PaymentService paymentService = new PaymentService(new RabbitMqQueue(), new BankClient());
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void registerTransaction(Transaction transaction) throws Exception {
-        paymentController.registerTransaction(transaction);
+        paymentService.registerTransaction(transaction);
     }
 }

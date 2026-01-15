@@ -9,4 +9,4 @@ Feature: Payment
         And the "payments.customerbankaccount.request" queue has one element with string "456-789"
         And the "payments.merchantbankaccount.request" queue has one element with string "123-456"
         And the "payments.transaction.report" queue has one element with string "456-789,123-456,10"
-        And the "payments.transaction.status" queue has one element with string "Transaction successful"
+        And the "payments.transaction.status" queue has one element with string "Bank transaction successful"

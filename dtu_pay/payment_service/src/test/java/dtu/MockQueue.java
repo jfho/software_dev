@@ -1,21 +1,33 @@
 package dtu;
 
+import dtu.Adapters.Event;
 import dtu.Adapters.MessageQueue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.function.Consumer;
 
 public class MockQueue implements MessageQueue {
-    private Map<String, Queue<String>> queues = new HashMap<>();
 
-    public void produce(String message, String routingKey) {
-        queues.computeIfAbsent(routingKey, k -> new LinkedList<>()).add(message);
+    private final Map<String, List<Consumer<Event>>> handlers = new HashMap<>();
+
+    @Override
+    public void publish(Event event) {
+        String topic = event.getType();
+        
+        List<Consumer<Event>> subscribers = handlers.get(topic);
+        
+        if (subscribers != null) {
+            for (Consumer<Event> handler : subscribers) {
+                handler.accept(event);
+            }
+        }
     }
 
-    public String consume(String routingKey) throws Exception {
-        Queue<String> queue = queues.get(routingKey);
-        return queue.poll();
+    @Override
+    public void addHandler(String topic, Consumer<Event> handler) {
+        handlers.computeIfAbsent(topic, k -> new ArrayList<>()).add(handler);
     }
 }
