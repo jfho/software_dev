@@ -15,8 +15,8 @@ import dtu.messagingUtils.MessageQueue;
 
 public class RabbitMqQueue implements MessageQueue {
 
-	private static final String DEFAULT_HOSTNAME = "localhost";
-	private static final String EXCHANGE_NAME = "eventsExchange";
+	private static final String DEFAULT_HOSTNAME = "rabbitmq";
+	private static final String EXCHANGE_NAME = "DTUPAY_EVENTS";
 	private static final String QUEUE_TYPE = "topic";
 
 	private Channel channel;

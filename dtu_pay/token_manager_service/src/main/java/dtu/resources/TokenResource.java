@@ -6,7 +6,7 @@ import dtu.services.TokenService;
 import java.util.List;
 
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -23,7 +23,7 @@ public class TokenResource {
         return controller.getAllTokensByCustomer(customerId);
     }
 
-    @PUT
+    @POST
     @Path("/customer/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> createTokens(@PathParam("customerId") String customerId) {

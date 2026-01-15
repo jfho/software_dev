@@ -24,13 +24,14 @@ public class CustomerController {
         queue = q;
 
         queue.addHandler(BANKACCOUNT_CUSTOMER_REQ_RK, e -> {
-            LOG.info("RabbitConsumer received message");
-            String accountId = e.getArgument(0, String.class);
+            LOG.info("received customer bank account request message");
+            String customerId = e.getArgument(0, String.class);
             String corrId = e.getArgument(1, String.class);
+            LOG.info("customerId: " + customerId + ", corrId: " + corrId);
 
             String bankAccountId = null;
-            if (db.hasCustomer(accountId)) {
-                bankAccountId = db.getCustomer(accountId).bankAccountUuid();
+            if (db.hasCustomer(customerId)) {
+                bankAccountId = db.getCustomer(customerId).bankAccountUuid();
             }
 
             queue.publish(new Event(BANKACCOUNT_CUSTOMER_RES_RK, new Object[] { bankAccountId, corrId } ));

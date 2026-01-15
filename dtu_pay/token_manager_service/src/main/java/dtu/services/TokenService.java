@@ -5,6 +5,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jboss.logging.Logger;
+
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 
@@ -22,8 +24,10 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String customerIdResponse = "token.customerid.response";
+    private String customerIdResponse = "tokens.customerid.response";
     private String customerIdRequest = "payments.customerid.request";
+
+    private static final Logger LOG = Logger.getLogger(TokenService.class);
 
     public TokenService(MessageQueue q) {
         queue = q;
@@ -31,10 +35,12 @@ public class TokenService {
     }
 
     public void policyValidateToken(Event event) {
+        LOG.info("Checking token");
         String tokenId = event.getArgument(0, String.class);
         String corrId = event.getArgument(1, String.class);
         String customerId = validateToken(tokenId);
 
+        LOG.info("publishing token: " + customerId);
         queue.publish(new Event(customerIdResponse, new Object[] {customerId, corrId} )); 
     }
 

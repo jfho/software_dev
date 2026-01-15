@@ -22,7 +22,7 @@ public class TokenServiceSteps {
     private MessageQueue mq = new MockQueue();
     private TokenService tc = new TokenService(mq);
 
-    private String customerIdResponse = "token.customerid.response";
+    private String customerIdResponse = "tokens.customerid.response";
     
     @After
     public void clearTheData() {

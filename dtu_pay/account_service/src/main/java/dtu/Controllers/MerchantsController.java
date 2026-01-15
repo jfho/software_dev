@@ -18,19 +18,20 @@ public class MerchantsController {
     private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
     private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
 
-    private static final Logger LOG = Logger.getLogger(CustomerController.class);
+    private static final Logger LOG = Logger.getLogger(MerchantsController.class);
 
     public MerchantsController(MessageQueue q) {
         queue = q;
 
         queue.addHandler(BANKACCOUNT_MERCHANT_REQ_RK, e -> {
-            LOG.info("RabbitConsumer received message");
-            String accountId = e.getArgument(0, String.class);
+            LOG.info("received merchant bank account request message");
+            String merchantId = e.getArgument(0, String.class);
             String corrId = e.getArgument(1, String.class);
+            LOG.info("merchantId: " + merchantId + ", corrId: " + corrId);
 
             String bankAccountId = null;
-            if (db.hasMerchant(accountId)) {
-                bankAccountId = db.getMerchant(accountId).bankAccountUuid();
+            if (db.hasMerchant(merchantId)) {
+                bankAccountId = db.getMerchant(merchantId).bankAccountUuid();
             }
 
             queue.publish(new Event(BANKACCOUNT_MERCHANT_RES_RK, new Object[] { bankAccountId, corrId } ));

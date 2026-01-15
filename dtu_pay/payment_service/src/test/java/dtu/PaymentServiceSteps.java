@@ -41,7 +41,7 @@ public class PaymentServiceSteps {
 
         mq.addHandler("payments.customerid.request", event -> {
             String correlationId = event.getArgument(1, String.class);
-            mq.publish(new Event("token.customerid.response", new Object[] { customerId, correlationId }));
+            mq.publish(new Event("tokens.customerid.response", new Object[] { customerId, correlationId }));
         });
     }
 
@@ -60,7 +60,7 @@ public class PaymentServiceSteps {
         mq.addHandler("payments.customerbankaccount.request", event -> {
             String correlationId = event.getArgument(1, String.class);
             mq.publish(
-                    new Event("account.customerbankaccount.response", new Object[] { customerBankId, correlationId }));
+                    new Event("accounts.customerbankaccount.response", new Object[] { customerBankId, correlationId }));
         });
     }
 
@@ -69,7 +69,7 @@ public class PaymentServiceSteps {
         mq.addHandler("payments.merchantbankaccount.request", event -> {
             String correlationId = event.getArgument(1, String.class);
             mq.publish(
-                    new Event("account.merchantbankaccount.response", new Object[] { merchantBankId, correlationId }));
+                    new Event("accounts.merchantbankaccount.response", new Object[] { merchantBankId, correlationId }));
         });
     }
 

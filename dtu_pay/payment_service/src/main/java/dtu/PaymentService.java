@@ -5,6 +5,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.logging.Logger;
+
 import dtu.Adapters.BankClientInterface;
 import dtu.Adapters.Event;
 import dtu.Adapters.MessageQueue;
@@ -16,13 +18,15 @@ public class PaymentService {
 
     private Map<String, CompletableFuture<String>> pendingRequests = new ConcurrentHashMap<>();
 
+    private static final Logger LOG = Logger.getLogger(PaymentService.class);
+
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
         this.bankClient = bankClient;
 
-        this.mq.addHandler("token.customerid.response", this::handleResponse);
-        this.mq.addHandler("account.customerbankaccount.response", this::handleResponse);
-        this.mq.addHandler("account.merchantbankaccount.response", this::handleResponse);
+        this.mq.addHandler("tokens.customerid.response", this::handleResponse);
+        this.mq.addHandler("accounts.customerbankaccount.response", this::handleResponse);
+        this.mq.addHandler("accounts.merchantbankaccount.response", this::handleResponse);
     }
 
     public void handleResponse(Event event) {
@@ -75,16 +79,25 @@ public class PaymentService {
 
     // 1. consumes the token and merchant id and amount done
     public void registerTransaction(Transaction transaction) throws Exception {
+        LOG.info("Getting customerId from token");
         String customerId = getCustomerIdFromToken(transaction.tokenId());
+        LOG.info("Received: " + customerId);
 
+        LOG.info("Getting customer bank account id");
         String customerBankAccountId = getBankAccountIdById(customerId, "customerbankaccount");
+        LOG.info("Received: " + customerBankAccountId);
+        LOG.info("Getting merchant bank account id");
         String merchantBankAccountId = getBankAccountIdById(transaction.merchantId(), "merchantbankaccount");
+        LOG.info("Received: " + merchantBankAccountId);
 
         boolean transferSuccessful = bankClient.transfer(customerBankAccountId, merchantBankAccountId,
                 transaction.amount());
 
+        LOG.info("Transfer successful? " + transferSuccessful);
+
         if (transferSuccessful) {
             // 7. send the transaction to the reporting service
+            LOG.info("Emitting event");
             mq.publish(new Event("payments.transaction.report",
                     new Object[] { customerId, transaction.merchantId(), transaction.amount().toString() }));
             mq.publish(new Event("payments.transaction.status", new Object[] { "Bank transaction successful" }));

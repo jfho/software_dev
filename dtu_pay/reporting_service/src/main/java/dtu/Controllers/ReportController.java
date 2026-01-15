@@ -25,17 +25,18 @@ public class ReportController {
         queue = q;
 
         queue.addHandler(TRANSACTION_COMPLETED_RK, e -> {
-            LOG.info("RabbitConsumer received message");
+            LOG.info("Received a transaction report");
             String customerId = e.getArgument(0, String.class);
             String merchantId = e.getArgument(1, String.class);
             String amount = e.getArgument(2, String.class);
+            LOG.info("customerId: " + customerId + ", merchantId: " + merchantId + ", amount: " + amount);
 
             RecordedPayment payment = new RecordedPayment(customerId, merchantId, amount);
             db.addPayment(payment);
 		});
     }
 
-    public ArrayList<RecordedPayment> getAllTransactions() {
+    public List<RecordedPayment> getAllTransactions() {
         return db.listPayments();
     }
 

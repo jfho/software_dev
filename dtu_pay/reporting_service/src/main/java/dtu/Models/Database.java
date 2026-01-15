@@ -1,6 +1,7 @@
 package dtu.Models;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 public class Database {
     private static final Database INSTANCE = new Database();
 
-    private ArrayList<RecordedPayment> payments = new ArrayList<RecordedPayment>();
+    private CopyOnWriteArrayList<RecordedPayment> payments = new CopyOnWriteArrayList<RecordedPayment>();
 
     private Database() {}
 
@@ -22,11 +23,11 @@ public class Database {
         payments.add(payment);
     }
    
-    public ArrayList<RecordedPayment> listPayments() {
+    public List<RecordedPayment> listPayments() {
         return payments;
     }
 
     public void clean() {
-        payments = new ArrayList<RecordedPayment>();
+        payments.clear();
     }
 }
