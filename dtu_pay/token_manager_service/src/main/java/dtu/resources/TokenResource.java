@@ -1,7 +1,7 @@
-package dtu;
+package dtu.resources;
 
-import dtu.Controllers.TokenController;
-import dtu.messaging.implementations.RabbitMqQueue;
+import dtu.messagingUtils.implementations.RabbitMqQueue;
+import dtu.services.TokenService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/tokens")
 public class TokenResource {
-    private TokenController controller = new TokenController(new RabbitMqQueue());
+    private TokenService controller = new TokenService(new RabbitMqQueue());
 
     @GET
     @Path("/customer/{customerId}")

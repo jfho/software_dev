@@ -1,4 +1,4 @@
-package dtu.messaging;
+package dtu.messagingUtils;
 
 import java.util.function.Consumer;
 

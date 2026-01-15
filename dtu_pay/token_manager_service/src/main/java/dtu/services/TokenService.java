@@ -1,18 +1,18 @@
-package dtu.Controllers;
+package dtu.services;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import dtu.messaging.Event;
-import dtu.messaging.MessageQueue;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.Set;
 import java.util.Collections;
 
-public class TokenController {
+public class TokenService {
     // customerId -> list of tokenIds
     private final ConcurrentMap<String, List<String>> tokenMap = new ConcurrentHashMap<>();
     // tokenId -> customerId
@@ -22,22 +22,20 @@ public class TokenController {
     
     private MessageQueue queue;
 
+    private String customerIdResponse = "token.customerid.response";
+    private String customerIdRequest = "payments.customerid.request";
 
-    public TokenController(MessageQueue q) {
+    public TokenService(MessageQueue q) {
         queue = q;
-        queue.addHandler("validateToken", this::policyValidateToken);
-        queue.addHandler("createTokens", this::policyCreateTokens);
+        queue.addHandler(customerIdRequest, this::policyValidateToken);
     }
 
     public void policyValidateToken(Event event) {
         String tokenId = event.getArgument(0, String.class);
-        validateToken(tokenId);
-    }
+        String corrId = event.getArgument(1, String.class);
+        String customerId = validateToken(tokenId);
 
-    public void policyCreateTokens(Event event) {
-        String customerId = event.getArgument(0, String.class);
-        int amount = event.getArgument(1, Integer.class);
-        createTokens(customerId, amount);
+        queue.publish(new Event(customerIdResponse, new Object[] {customerId, corrId} )); 
     }
 
     private String createTokenID() {
@@ -96,6 +94,10 @@ public class TokenController {
         tokenToCustomer.clear();
         // global set of tokenIds to avoid collisions
         tokens.clear();
+    }
+
+    public String getCustomerFromToken(String tokenID) {
+        return tokenToCustomer.get(tokenID);
     }
 
 }

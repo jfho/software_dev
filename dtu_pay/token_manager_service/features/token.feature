@@ -34,5 +34,10 @@ Feature: Token
         When the token is asked to be validated
         Then the customerId is returned as null
         And the customer has "5" tokens
-    
 
+    Scenario: Send customerId associated with a token
+        Given a customerId "134" with "6" tokens
+        And a token is known to a merchant
+        And a subscriber for the customerId response event
+        When a request customerId event with the known token and correlation ID "6767676" is emitted
+        Then a customerId response event with customerId "134" and correlation ID "6767676" is emitted

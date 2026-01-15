@@ -1,4 +1,4 @@
-package dtu.messaging.implementations;
+package dtu.messagingUtils.implementations;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -10,8 +10,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
-import dtu.messaging.Event;
-import dtu.messaging.MessageQueue;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
 
 public class RabbitMqQueue implements MessageQueue {
 
