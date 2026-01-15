@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import dtu.messaging.Event;
+import dtu.messaging.MessageQueue;
+
 import java.util.concurrent.ConcurrentMap;
 import java.util.Set;
 import java.util.Collections;
@@ -15,6 +19,26 @@ public class TokenController {
     private final ConcurrentMap<String, String> tokenToCustomer = new ConcurrentHashMap<>();
     // global set of tokenIds to avoid collisions
     private final Set<String> tokens = ConcurrentHashMap.newKeySet();
+    
+    private MessageQueue queue;
+
+
+    public TokenController(MessageQueue q) {
+        queue = q;
+        queue.addHandler("validateToken", this::policyValidateToken);
+        queue.addHandler("createTokens", this::policyCreateTokens);
+    }
+
+    public void policyValidateToken(Event event) {
+        String tokenId = event.getArgument(0, String.class);
+        validateToken(tokenId);
+    }
+
+    public void policyCreateTokens(Event event) {
+        String customerId = event.getArgument(0, String.class);
+        int amount = event.getArgument(1, Integer.class);
+        createTokens(customerId, amount);
+    }
 
     private String createTokenID() {
         String tokenID = UUID.randomUUID().toString();
@@ -63,10 +87,6 @@ public class TokenController {
 
     public List<String> getAllTokensByCustomer(String customerID) {
         return tokenMap.getOrDefault(customerID, Collections.emptyList());
-    }
-
-    public String customerFromToken(String tokenId) {
-        return tokenToCustomer.get(tokenId);
     }
 
     public void clearData() {

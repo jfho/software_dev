@@ -1,6 +1,8 @@
-package dtu.Resources;
+package dtu;
 
 import dtu.Controllers.TokenController;
+import dtu.messaging.implementations.RabbitMqQueue;
+
 import java.util.List;
 
 import jakarta.ws.rs.GET;
@@ -12,7 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/tokens")
 public class TokenResource {
-    private TokenController controller = new TokenController();
+    private TokenController controller = new TokenController(new RabbitMqQueue());
 
     @GET
     @Path("/customer/{customerId}")
@@ -33,12 +35,5 @@ public class TokenResource {
     @Produces(MediaType.APPLICATION_JSON)
     public String validateToken(@PathParam("tokenId") String tokenId) {
         return controller.validateToken(tokenId);
-    }
-
-    @GET
-    @Path("/customerFromToken/{tokenId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String customerFromToken(@PathParam("tokenId") String tokenId) {
-        return controller.customerFromToken(tokenId);
     }
 }

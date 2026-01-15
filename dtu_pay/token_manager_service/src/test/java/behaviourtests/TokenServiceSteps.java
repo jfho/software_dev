@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import dtu.Controllers.TokenController;
+import dtu.messaging.implementations.RabbitMqQueue;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -13,7 +14,7 @@ public class TokenServiceSteps {
     private String customerId;
     private String tokenId;
     private String validationCustomerId;
-    private TokenController tc = new TokenController();
+    private TokenController tc = new TokenController(new RabbitMqQueue());
 
     @After
     public void clearTheData() {
