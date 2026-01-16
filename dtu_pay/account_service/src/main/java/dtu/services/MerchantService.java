@@ -25,7 +25,6 @@ public class MerchantService {
 
     private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
     private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
-    private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 
