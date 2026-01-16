@@ -87,7 +87,7 @@ public class AccountServiceSteps {
             customer = e.getArgument(0, Customer.class);
         });
         
-        Event event = new Event(REGISTER_CUSTOMER_REQ_RK, new Object[] { fn, ln, cpr, bankId, UUID.randomUUID().toString() });
+        Event event = new Event(REGISTER_CUSTOMER_REQ_RK, new Object[] { new Customer(fn, ln, cpr, bankId, null), UUID.randomUUID().toString() });
         mq.publish(event);
     }
 
@@ -97,7 +97,7 @@ public class AccountServiceSteps {
             merchant = e.getArgument(0, Merchant.class);
         });
         
-        Event event = new Event(REGISTER_MERCHANT_REQ_RK, new Object[] { fn, ln, cpr, bankId, UUID.randomUUID().toString() });
+        Event event = new Event(REGISTER_MERCHANT_REQ_RK, new Object[] { new Merchant(fn, ln, cpr, bankId, null), UUID.randomUUID().toString() });
         mq.publish(event);
     }
 
@@ -143,7 +143,7 @@ public class AccountServiceSteps {
             customer = e.getArgument(0, Customer.class);
         });
 
-        Event event = new Event(REGISTER_CUSTOMER_REQ_RK, new Object[] { fn, ln, cpr, bankId, UUID.randomUUID().toString() });
+        Event event = new Event(REGISTER_CUSTOMER_REQ_RK, new Object[] { new Customer(fn, ln, cpr, bankId, null), UUID.randomUUID().toString() });
         mq.publish(event);
     }
 
@@ -153,7 +153,7 @@ public class AccountServiceSteps {
             merchant = e.getArgument(0, Merchant.class);
         });
         
-        Event event = new Event(REGISTER_MERCHANT_REQ_RK, new Object[] {  fn, ln, cpr, bankId, UUID.randomUUID().toString() });
+        Event event = new Event(REGISTER_MERCHANT_REQ_RK, new Object[] { new Merchant(fn, ln, cpr, bankId, null), UUID.randomUUID().toString() });
         mq.publish(event);
     }
 

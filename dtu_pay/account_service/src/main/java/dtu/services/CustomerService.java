@@ -47,14 +47,10 @@ public class CustomerService {
         // register customer handler (facade)
         queue.addHandler(REGISTER_CUSTOMER_REQ_RK, e -> {
             LOG.info("received customer registration request");
-            String firstName = e.getArgument(0, String.class);
-            String lastName = e.getArgument(1, String.class);
-            String cpr = e.getArgument(2, String.class);
-            String bankUuid = e.getArgument(3, String.class);
-            String corrId = e.getArgument(4, String.class);
-            LOG.info("firstName: " + firstName + ", lastName: " + lastName);
+            Customer customerToRegister = e.getArgument(0, Customer.class);
+            String corrId = e.getArgument(1, String.class);
 
-            Customer newCustomer = registerCustomer(new Customer(firstName, lastName, cpr, bankUuid, null));
+            Customer newCustomer = registerCustomer(customerToRegister);
 
             queue.publish(new Event(REGISTER_CUSTOMER_RES_RK, new Object[] { newCustomer, corrId } ));
 		});
