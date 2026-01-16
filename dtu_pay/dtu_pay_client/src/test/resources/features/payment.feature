@@ -2,6 +2,7 @@ Feature: Payment
     Scenario: Successful payment
         Given a customer bank account with first name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "1000"
         And a merchant bank account with first name "Caroline", last name "Strauss", CPR "654321-4321", and balance "1000"
+        And the merchant has a token from the customer
         When the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
         When the merchant registers for DTUPay with first name "Caroline", last name "Strauss", CPR "654321-4321"
         When the customer performs a payment for "10" kr to the merchant
