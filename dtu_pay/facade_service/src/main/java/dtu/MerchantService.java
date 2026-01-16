@@ -83,6 +83,6 @@ public class MerchantService {
     }
 
     public void registerTransaction(MerchantTransaction transaction) {
-        mq.publish(new Event("payments.payment.register", new Object[] { transaction }));
+        mq.publish(new Event("facade.payments.register", new Object[] { transaction }));
     }
 }
