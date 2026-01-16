@@ -1,10 +1,14 @@
 package dtu.resources;
 
+import dtu.MerchantService;
 import dtu.messagingUtils.implementations.RabbitMqQueue;
-import dtu.services.TokenService;
+import dtu.models.Merchant;
+import dtu.models.MerchantTransaction;
 
 import java.util.List;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -12,28 +16,35 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/tokens")
-public class CustomerResource {
-    private TokenService controller = new TokenService(new RabbitMqQueue());
-
-    @GET
-    @Path("/customer/{customerId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getTokensByCustomerID(@PathParam("customerId") String customerId) {
-        return controller.getAllTokensByCustomer(customerId);
-    }
+@Path("/merchants")
+public class MerchantResource {
+    private MerchantService service = new MerchantService(new RabbitMqQueue());
 
     @POST
-    @Path("/customer/{customerId}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> createTokens(@PathParam("customerId") String customerId) {
-        return controller.createTokens(customerId, 6); //INIT finegrain control of tokens to create
+    public Merchant registerMerchant(Merchant merchant) {
+        return service.registerMerchant(merchant);
     }
 
     @GET
-    @Path("/token/{tokenId}")
+    @Path("/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String validateToken(@PathParam("tokenId") String tokenId) {
-        return controller.validateToken(tokenId);
+    public Merchant getMerchant(@PathParam("merchantId") String merchantId) {
+        return service.getMerchant(merchantId);
+    }
+
+    @DELETE
+    @Path("/{merchantId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void deleteMerchant(@PathParam("merchantId") String merchantId) {
+        service.deleteMerchant(merchantId);
+    }
+
+    @GET
+    @Path("/{merchantId}/reports")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<MerchantTransaction> getReport(@PathParam("merchantId") String merchantId) {
+        return service.getTransactionsForMerchant(merchantId);
     }
 }
