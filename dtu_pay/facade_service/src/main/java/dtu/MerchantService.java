@@ -21,7 +21,6 @@ public class MerchantService {
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 
-    // Routing Key Constants
     private final String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
     private final String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
     
