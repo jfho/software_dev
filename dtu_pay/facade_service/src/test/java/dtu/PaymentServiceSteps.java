@@ -1,3 +1,6 @@
+
+
+
 package dtu;
 
 import static org.junit.Assert.assertEquals;
@@ -7,15 +10,15 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import dtu.Adapters.Event;
-import dtu.Models.Transaction;
+import dtu.adapters.Event;
+import dtu.models.Transaction;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 public class PaymentServiceSteps {
     private MockQueue mq = new MockQueue();
-    private PaymentService paymentService = new PaymentService(mq, new MockBankClient());
+    private CustomerService paymentService = new CustomerService(mq, new MockBankClient());
 
     private Map<String, Event> publishedEvents = new HashMap<>();
 

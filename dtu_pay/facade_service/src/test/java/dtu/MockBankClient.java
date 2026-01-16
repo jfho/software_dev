@@ -2,7 +2,7 @@ package dtu;
 
 import java.math.BigDecimal;
 
-import dtu.Adapters.BankClientInterface;
+import dtu.adapters.BankClientInterface;
 
 public class MockBankClient implements BankClientInterface {
     public MockBankClient() {

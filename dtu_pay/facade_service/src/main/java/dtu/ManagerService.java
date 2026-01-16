@@ -12,15 +12,15 @@ import dtu.Adapters.Event;
 import dtu.Adapters.MessageQueue;
 import dtu.Models.Transaction;
 
-public class PaymentService {
+public class CustomerService {
     MessageQueue mq;
     BankClientInterface bankClient;
 
     private Map<String, CompletableFuture<String>> pendingRequests = new ConcurrentHashMap<>();
 
-    private static final Logger LOG = Logger.getLogger(PaymentService.class);
+    private static final Logger LOG = Logger.getLogger(CustomerService.class);
 
-    public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
+    public CustomerService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
         this.bankClient = bankClient;
 
