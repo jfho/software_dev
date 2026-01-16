@@ -20,26 +20,26 @@ public class PaymentService {
 
     private static final Logger LOG = Logger.getLogger(PaymentService.class);
 
-    private final String REGISTER_PAYMENT_REQ_RK = "facade.payments.register";
+    private final String PAYMENTS_REGISTER_REQ_RK = "facade.payments.register";
     private final String TOKEN_CUSTOMERID_RES_RK = "tokens.customerid.response";
-    private final String CUSTOMER_BANKACCOUNT_RES_RK = "accounts.customerbankaccount.response";
-    private final String MERCHANT_BANKACCOUNT_RES_RK = "accounts.merchantbankaccount.response";
+    private final String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
+    private final String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
 
     private final String TOKEN_CUSTOMERID_REQ_RK = "payments.customerid.request";
-    private final String CUSTOMER_BANKACCOUNT_REQ_RK = "payments.customerbankaccount.request";
-    private final String MERCHANT_BANKACCOUNT_REQ_RK = "payments.merchantbankaccount.request";
+    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
+    private final String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
 
-    private final String TRANSACTION_REPORT_RK = "payments.transaction.report";
-    private final String TRANSACTION_STATUS_RK = "payments.transaction.status";
+    private final String PAYMENTS_REPORT_REQ_RK = "payments.transaction.report";
+    private final String PAYMENTS_STATUS_REQ_RK = "payments.transaction.status";
 
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
         this.bankClient = bankClient;
 
-        this.mq.addHandler(REGISTER_PAYMENT_REQ_RK, this::handleRegistration);
+        this.mq.addHandler(PAYMENTS_REGISTER_REQ_RK, this::handleRegistration);
         this.mq.addHandler(TOKEN_CUSTOMERID_RES_RK, this::handleResponse);
-        this.mq.addHandler(CUSTOMER_BANKACCOUNT_RES_RK, this::handleResponse);
-        this.mq.addHandler(MERCHANT_BANKACCOUNT_RES_RK, this::handleResponse);
+        this.mq.addHandler(BANKACCOUNT_CUSTOMER_RES_RK, this::handleResponse);
+        this.mq.addHandler(BANKACCOUNT_MERCHANT_RES_RK, this::handleResponse);
     }
 
     public void handleRegistration(Event event) {
@@ -80,12 +80,13 @@ public class PaymentService {
         return customerId;
     }
 
-    public String getBankAccountId(String dtuPayId, String topic) throws Exception {
+    // Helper method: Takes the specific routing key for the request
+    public String getBankAccountId(String dtuPayId, String routingKey) throws Exception {
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<String> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event(topic, new Object[] { dtuPayId, correlationId }));
+        mq.publish(new Event(routingKey, new Object[] { dtuPayId, correlationId }));
 
         String bankAccountId = future.join();
 
@@ -101,11 +102,11 @@ public class PaymentService {
         LOG.info("Resolved CustomerId: " + customerId);
 
         LOG.info("Step 2: resolving customer bank account...");
-        String customerBankAccountId = getBankAccountId(customerId, CUSTOMER_BANKACCOUNT_REQ_RK);
+        String customerBankAccountId = getBankAccountId(customerId, BANKACCOUNT_CUSTOMER_REQ_RK);
         LOG.info("Resolved Customer Bank Account: " + customerBankAccountId);
 
         LOG.info("Step 3: resolving merchant bank account...");
-        String merchantBankAccountId = getBankAccountId(transaction.merchantId(), MERCHANT_BANKACCOUNT_REQ_RK);
+        String merchantBankAccountId = getBankAccountId(transaction.merchantId(), BANKACCOUNT_MERCHANT_REQ_RK);
         LOG.info("Resolved Merchant Bank Account: " + merchantBankAccountId);
 
         LOG.info("Step 4: Executing bank transfer...");
@@ -115,12 +116,12 @@ public class PaymentService {
 
         if (transferSuccessful) {
             LOG.info("Transaction complete. Emitting report.");
-            mq.publish(new Event(TRANSACTION_REPORT_RK,
+            mq.publish(new Event(PAYMENTS_REPORT_REQ_RK,
                     new Object[] { customerId, transaction.merchantId(), transaction.amount().toString() }));
-            mq.publish(new Event(TRANSACTION_STATUS_RK, new Object[] { "Bank transaction successful" }));
+            mq.publish(new Event(PAYMENTS_STATUS_REQ_RK, new Object[] { "Bank transaction successful" }));
         } else {
             LOG.warn("Transaction failed at bank level.");
-            mq.publish(new Event(TRANSACTION_STATUS_RK, new Object[] { "Bank transaction failed" }));
+            mq.publish(new Event(PAYMENTS_STATUS_REQ_RK, new Object[] { "Bank transaction failed" }));
         }
     }
 }
