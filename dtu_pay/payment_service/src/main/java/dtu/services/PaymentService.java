@@ -1,4 +1,4 @@
-package dtu;
+package dtu.services;
 
 import java.util.Map;
 import java.util.UUID;
@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.logging.Logger;
 
 import dtu.adapters.BankClientInterface;
-import dtu.adapters.Event;
-import dtu.adapters.MessageQueue;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
 import dtu.models.Transaction;
 
 public class PaymentService {
@@ -24,9 +24,19 @@ public class PaymentService {
         this.mq = mq;
         this.bankClient = bankClient;
 
+        this.mq.addHandler("facade.payments.register", this::handleRegistration);
         this.mq.addHandler("tokens.customerid.response", this::handleResponse);
         this.mq.addHandler("accounts.customerbankaccount.response", this::handleResponse);
         this.mq.addHandler("accounts.merchantbankaccount.response", this::handleResponse);
+    }
+
+    public void handleRegistration(Event event) {
+        Transaction transaction = event.getArgument(0, Transaction.class);
+        try {
+            registerTransaction(transaction);
+        } catch (Exception e) {
+            LOG.warn("Registering transaction failed, error " + e.getMessage());
+        }
     }
 
     public void handleResponse(Event event) {
@@ -96,7 +106,6 @@ public class PaymentService {
         LOG.info("Transfer successful? " + transferSuccessful);
 
         if (transferSuccessful) {
-            // 7. send the transaction to the reporting service
             LOG.info("Emitting event");
             mq.publish(new Event("payments.transaction.report",
                     new Object[] { customerId, transaction.merchantId(), transaction.amount().toString() }));

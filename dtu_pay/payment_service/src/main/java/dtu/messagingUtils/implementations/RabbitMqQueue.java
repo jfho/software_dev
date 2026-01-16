@@ -1,4 +1,4 @@
-package dtu.adapters;
+package dtu.messagingUtils.implementations;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -10,7 +10,11 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
+
 public class RabbitMqQueue implements MessageQueue {
+
 	private static final String DEFAULT_HOSTNAME = "rabbitmq";
 	private static final String EXCHANGE_NAME = "DTUPAY_EVENTS";
 	private static final String QUEUE_TYPE = "topic";

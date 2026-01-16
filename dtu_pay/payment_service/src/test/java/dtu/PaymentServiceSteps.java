@@ -7,8 +7,9 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import dtu.adapters.Event;
+import dtu.messagingUtils.Event;
 import dtu.models.Transaction;
+import dtu.services.PaymentService;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -52,7 +53,7 @@ public class PaymentServiceSteps {
 
     @Given("a transaction with token {string} and amount {string} kr")
     public void a_transaction_with_token_and_amount_kr(String tokenId, String amount) {
-        transaction = new Transaction(tokenId, merchantId, new BigDecimal(amount));
+        transaction = new Transaction(tokenId, merchantId, new BigDecimal(amount), null, null);
     }
 
     @Given("a customer bank account with id {string}")
