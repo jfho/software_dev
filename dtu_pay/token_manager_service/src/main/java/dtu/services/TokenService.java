@@ -24,8 +24,8 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String createTokensRequest = "facade.createTokens.request";
-    private String createTokensResponse = "tokens.createTokens.response";
+    private String createTokensRequest = "facade.createtokens.request";
+    private String createTokensResponse = "tokens.createtokens.response";
     private String customerIdRequest = "payments.customerid.request";
     private String customerIdResponse = "tokens.customerid.response";
 
