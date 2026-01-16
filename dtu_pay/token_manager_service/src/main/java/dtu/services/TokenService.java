@@ -24,14 +24,29 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String customerIdResponse = "tokens.customerid.response";
+    private String createTokensRequest = "facade.createTokens.request";
+    private String createTokensResponse = "tokens.createTokens.response";
     private String customerIdRequest = "payments.customerid.request";
+    private String customerIdResponse = "tokens.customerid.response";
 
     private static final Logger LOG = Logger.getLogger(TokenService.class);
 
     public TokenService(MessageQueue q) {
+        LOG.info("Starting token service");
         queue = q;
+        queue.addHandler(createTokensRequest, this::policyCreateTokens);
         queue.addHandler(customerIdRequest, this::policyValidateToken);
+    }
+
+    public void policyCreateTokens(Event event) {
+        LOG.info("Creating tokens");
+        String customerId = event.getArgument(0, String.class);
+        String corrId = event.getArgument(1, String.class);
+        
+        List<String> tokenList = createTokens(customerId, 6);
+
+        LOG.info("publishing token list");
+        queue.publish(new Event(createTokensResponse, new Object[] {tokenList, corrId} )); 
     }
 
     public void policyValidateToken(Event event) {
