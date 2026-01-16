@@ -21,11 +21,24 @@ public class MerchantService {
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 
+    // Routing Key Constants
+    private final String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
+    private final String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
+    
+    private final String GET_MERCHANT_REQ_RK = "facade.getMerchant.request";
+    private final String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
+
+    private final String MERCHANT_REPORT_REQ_RK = "facade.merchantreport.request";
+    private final String MERCHANT_REPORT_RES_RK = "reports.merchant.response";
+
+    private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
+    private final String REGISTER_PAYMENT_REQ_RK = "facade.payments.register";
+
     public MerchantService(MessageQueue mq) {
         this.mq = mq;
-        this.mq.addHandler("facade.registerMerchant.response", this::handleResponse);
-        this.mq.addHandler("facade.getMerchant.response", this::handleResponse);
-        this.mq.addHandler("reports.merchant.response", this::handleResponse);
+        this.mq.addHandler(REGISTER_MERCHANT_RES_RK, this::handleResponse);
+        this.mq.addHandler(GET_MERCHANT_RES_RK, this::handleResponse);
+        this.mq.addHandler(MERCHANT_REPORT_RES_RK, this::handleResponse);
     }
 
     public void handleResponse(Event event) {
@@ -48,7 +61,7 @@ public class MerchantService {
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.registerMerchant.request", new Object[] { merchant, correlationId }));
+        mq.publish(new Event(REGISTER_MERCHANT_REQ_RK, new Object[] { merchant, correlationId }));
 
         Event resultEvent = future.join();
         Merchant result = resultEvent.getArgument(0, Merchant.class);
@@ -65,7 +78,7 @@ public class MerchantService {
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.getMerchant.request", new Object[] { merchantId, correlationId }));
+        mq.publish(new Event(GET_MERCHANT_REQ_RK, new Object[] { merchantId, correlationId }));
 
         Event resultEvent = future.join();
         LOG.info("Details retrieved for merchant ID: " + merchantId);
@@ -80,7 +93,7 @@ public class MerchantService {
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.merchantreport.request", new Object[] { merchantId, correlationId }));
+        mq.publish(new Event(MERCHANT_REPORT_REQ_RK, new Object[] { merchantId, correlationId }));
 
         Event resultEvent = future.join();
 
@@ -93,11 +106,11 @@ public class MerchantService {
 
     public void deleteMerchant(String merchantId) {
         LOG.info("Requesting deletion for merchant ID: " + merchantId);
-        mq.publish(new Event("facade.deleteMerchant.request", new Object[] { merchantId }));
+        mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId }));
     }
 
     public void registerTransaction(MerchantTransaction transaction) {
         LOG.info("Registering new transaction: " + transaction);
-        mq.publish(new Event("facade.payments.register", new Object[] { transaction }));
+        mq.publish(new Event(REGISTER_PAYMENT_REQ_RK, new Object[] { transaction }));
     }
 }
