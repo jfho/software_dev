@@ -1,0 +1,33 @@
+package dtu;
+
+import dtu.Adapters.Event;
+import dtu.Adapters.MessageQueue;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+public class MockQueue implements MessageQueue {
+
+    private final Map<String, List<Consumer<Event>>> handlers = new HashMap<>();
+
+    @Override
+    public void publish(Event event) {
+        String topic = event.getType();
+        
+        List<Consumer<Event>> subscribers = handlers.get(topic);
+        
+        if (subscribers != null) {
+            for (Consumer<Event> handler : subscribers) {
+                handler.accept(event);
+            }
+        }
+    }
+
+    @Override
+    public void addHandler(String topic, Consumer<Event> handler) {
+        handlers.computeIfAbsent(topic, k -> new ArrayList<>()).add(handler);
+    }
+}
