@@ -64,7 +64,7 @@ public class PaymentService {
         String customerId = future.join();
 
         // 4. if not null, send the customer id and the merchant id to the account done
-        if (customerId.isEmpty()) {
+        if (customerId == null || customerId.isEmpty()) {
             throw new Exception("Invalid token");
         }
         return customerId;
@@ -81,7 +81,7 @@ public class PaymentService {
         // 5. consumes the bank account if not null
         String bankAccountId = future.join();
 
-        if (bankAccountId.isEmpty()) {
+        if (bankAccountId == null || bankAccountId.isEmpty()) {
             throw new Exception("Unknown customer or merchant");
         }
         return bankAccountId;
