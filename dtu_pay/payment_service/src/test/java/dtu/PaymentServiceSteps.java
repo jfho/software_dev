@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import dtu.Adapters.Event;
-import dtu.Models.Transaction;
+import dtu.adapters.Event;
+import dtu.models.Transaction;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

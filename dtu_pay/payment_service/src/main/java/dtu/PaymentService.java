@@ -7,10 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
-import dtu.Adapters.BankClientInterface;
-import dtu.Adapters.Event;
-import dtu.Adapters.MessageQueue;
-import dtu.Models.Transaction;
+import dtu.adapters.BankClientInterface;
+import dtu.adapters.Event;
+import dtu.adapters.MessageQueue;
+import dtu.models.Transaction;
 
 public class PaymentService {
     MessageQueue mq;

@@ -12,17 +12,16 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import jakarta.ws.rs.NotFoundException;
-import dtu.Controllers.ReportController;
-import dtu.MessagingUtils.Event;
-import dtu.MessagingUtils.MessageQueue;
-import dtu.Models.Customer;
-import dtu.Models.Database;
-import dtu.Models.Merchant;
-import dtu.Models.RecordedPayment;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
+import dtu.models.Customer;
+import dtu.models.Database;
+import dtu.models.Merchant;
+import dtu.models.RecordedPayment;
 
 public class ReportingServiceSteps {
     Database db = Database.getInstance();
-    ReportController controller;
+    ReportService controller;
     MessageQueue mq;
 
     Customer customer1 = null;
@@ -44,7 +43,7 @@ public class ReportingServiceSteps {
         retrievedPayments = null;
 
         mq = new MockQueue();
-        controller = new ReportController(mq);
+        controller = new ReportService(mq);
         db.clean();
     }
 

@@ -1,13 +1,13 @@
 package dtu;
 
-import dtu.Adapters.Event;
-import dtu.Adapters.MessageQueue;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import dtu.adapters.Event;
+import dtu.adapters.MessageQueue;
 
 public class MockQueue implements MessageQueue {
 

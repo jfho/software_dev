@@ -16,48 +16,6 @@ services:
       retries: 10
       start_period: 10s  # Added: wait 30s before starting health checks
 
-  facade_service:
-    image: nginx:alpine
-    ports:
-      - "8080:8080"
-    networks:
-      - dtupay_internal
-    volumes:
-      - ./facade_service/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      rabbitmq:
-        condition: service_healthy  # Wait for health check to pass
-
-  payment_service:
-    build: ./payment_service
-    image: payment_service
-    container_name: payment_service
-    networks:
-      - dtupay_internal
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-  account_service:
-    build: ./account_service
-    image: account_service
-    container_name: account_service
-    networks:
-      - dtupay_internal
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
-  reporting_service:
-    build: ./reporting_service
-    image: reporting_service
-    container_name: reporting_service
-    networks:
-      - dtupay_internal
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
   token_manager_service:
     build: ./token_manager_service
     image: token_manager_service

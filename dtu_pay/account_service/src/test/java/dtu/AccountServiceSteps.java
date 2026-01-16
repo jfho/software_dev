@@ -10,20 +10,20 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import jakarta.ws.rs.NotFoundException;
-import dtu.Controllers.CustomerController;
-import dtu.Controllers.MerchantsController;
-import dtu.MessagingUtils.Event;
-import dtu.MessagingUtils.MessageQueue;
-import dtu.Models.Customer;
-import dtu.Models.Database;
-import dtu.Models.Merchant;
+import dtu.services.CustomerService;
+import dtu.services.MerchantService;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
+import dtu.models.Customer;
+import dtu.Database;
+import dtu.models.Merchant;
 
 public class AccountServiceSteps {
     Database db = Database.getInstance();
     
     MessageQueue mq;
-    CustomerController customerController;
-    MerchantsController merchantController;
+    CustomerService customerController;
+    MerchantService merchantController;
 
     Customer customer = null;
     Merchant merchant = null;
@@ -55,8 +55,8 @@ public class AccountServiceSteps {
         merchantBankAccountResponse = null;
 
         mq = new MockQueue();
-        customerController = new CustomerController(mq);
-        merchantController = new MerchantsController(mq);
+        customerController = new CustomerService(mq);
+        merchantController = new MerchantService(mq);
 
         db.clean();
     }

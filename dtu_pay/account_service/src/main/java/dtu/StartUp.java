@@ -1,7 +1,8 @@
 package dtu;
 
 import dtu.messagingUtils.implementations.RabbitMqQueue;
-import dtu.services.TokenService;
+import dtu.services.CustomerService;
+import dtu.services.MerchantService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 
@@ -10,6 +11,7 @@ public class StartUp {
 
 	@PostConstruct
 	void init() throws Exception {
-		new TokenService(new RabbitMqQueue("rabbitmq"));
+		new CustomerService(new RabbitMqQueue("rabbitmq"));
+		new MerchantService(new RabbitMqQueue("rabbitmq"));
 	}
 }
