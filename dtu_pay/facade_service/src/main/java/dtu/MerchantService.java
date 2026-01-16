@@ -80,7 +80,6 @@ public class MerchantService {
     }
 
     public void deleteMerchant(String merchantId) {
-        String correlationId = UUID.randomUUID().toString();
-        mq.publish(new Event("facade.merchant.delete", new Object[] { merchantId, correlationId }));
+        mq.publish(new Event("facade.merchant.delete", new Object[] { merchantId }));
     }
 }
