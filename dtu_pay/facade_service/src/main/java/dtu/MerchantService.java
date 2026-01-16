@@ -26,7 +26,6 @@ public class MerchantService {
         this.mq.addHandler("accounts.registerMerchant.response", this::handleResponse);
         this.mq.addHandler("accounts.getMerchant.response", this::handleResponse);
         this.mq.addHandler("reports.merchant.response", this::handleResponse);
-        this.mq.addHandler("payments.payment.register", this::handleResponse);
     }
 
     public void handleResponse(Event event) {
@@ -81,5 +80,9 @@ public class MerchantService {
 
     public void deleteMerchant(String merchantId) {
         mq.publish(new Event("facade.merchant.delete", new Object[] { merchantId }));
+    }
+
+    public void registerTransaction(MerchantTransaction transaction) {
+        mq.publish(new Event("payments.payment.register", new Object[] { transaction }));
     }
 }

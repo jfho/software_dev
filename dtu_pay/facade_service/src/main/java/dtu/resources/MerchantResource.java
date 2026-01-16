@@ -47,4 +47,11 @@ public class MerchantResource {
     public List<MerchantTransaction> getReport(@PathParam("merchantId") String merchantId) {
         return service.getTransactionsForMerchant(merchantId);
     }
+
+    @POST
+    @Path("/{merchantId}/payments")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void registerTransaction(MerchantTransaction transaction) {
+        service.registerTransaction(transaction);
+    }
 }
