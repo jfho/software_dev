@@ -1,4 +1,4 @@
-package behaviourtests;
+package dtu;
 
 import java.util.ArrayList;
 import java.util.HashMap;
