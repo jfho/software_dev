@@ -50,9 +50,9 @@ public class MerchantResource {
     @POST
     @Path("/{merchantId}/payments")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void registerTransaction(@PathParam("merchantId") String merchantId, String tokenId, String amount) {
-        MerchantTransaction transaction = new MerchantTransaction(tokenId, merchantId, amount, null, null);
-        
-        service.registerTransaction(transaction);
+    public void registerTransaction(@PathParam("merchantId") String merchantId, MerchantTransaction transaction) {
+        MerchantTransaction resultTransaction = new MerchantTransaction(transaction.tokenId(), merchantId,
+                transaction.amount());
+        service.registerTransaction(resultTransaction);
     }
 }

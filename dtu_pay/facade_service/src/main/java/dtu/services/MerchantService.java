@@ -33,8 +33,8 @@ public class MerchantService {
 
     private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
 
-    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.register";
-    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.status";
+    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
+    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
 
     public MerchantService(MessageQueue mq) {
         this.mq = mq;
@@ -128,7 +128,7 @@ public class MerchantService {
             LOG.warn("Transaction failed!");
             return false;
         } else {
-            LOG.info("Transaction with ID " + transaction.transactionId() + " succeeded!");
+            LOG.info("Transaction succeeded!");
             return true;
         }
     }
