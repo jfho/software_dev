@@ -1,5 +1,7 @@
 package dtu;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -7,102 +9,93 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
-import dtu.adapters.BankClientInterface;
-import dtu.adapters.Event;
-import dtu.adapters.MessageQueue;
-import dtu.models.Transaction;
+import dtu.models.CustomerTransaction;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
+import dtu.models.Customer;
 
 public class CustomerService {
     MessageQueue mq;
-    BankClientInterface bankClient;
 
-    private Map<String, CompletableFuture<String>> pendingRequests = new ConcurrentHashMap<>();
+    private Map<String, CompletableFuture<Event>> pendingRequests = new ConcurrentHashMap<>();
 
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
 
-    public CustomerService(MessageQueue mq, BankClientInterface bankClient) {
+    public CustomerService(MessageQueue mq) {
         this.mq = mq;
-        this.bankClient = bankClient;
+        this.mq.addHandler("accounts.registerCustomer.response", this::handleResponse);
+        this.mq.addHandler("accounts.getCustomer.response", this::handleResponse);
+        this.mq.addHandler("reports.customer.response", this::handleResponse);
 
-        this.mq.addHandler("tokens.customerid.response", this::handleResponse);
-        this.mq.addHandler("accounts.customerbankaccount.response", this::handleResponse);
-        this.mq.addHandler("accounts.merchantbankaccount.response", this::handleResponse);
+        this.mq.addHandler("tokens.register.response", this::handleResponse);
     }
+    
 
     public void handleResponse(Event event) {
-        String result = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
 
-        CompletableFuture<String> future = pendingRequests.remove(correlationId);
+        CompletableFuture<Event> future = pendingRequests.remove(correlationId);
 
         if (future != null) {
-            future.complete(result);
+            future.complete(event);
         } else {
-            throw new RuntimeException();
+            LOG.warn("Received response for unknown request ID: " + correlationId);
         }
     }
 
-    private String getCustomerIdFromToken(String tokenId) throws Exception {
+    public Customer registerCustomer(Customer customer) {
         String correlationId = UUID.randomUUID().toString();
-        CompletableFuture<String> future = new CompletableFuture<>();
+        CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        Event event = new Event("payments.customerid.request", new Object[] { tokenId, correlationId });
-        mq.publish(event);
+        mq.publish(new Event("facade.customer.register", new Object[] { customer, correlationId }));
 
-        // 3. consumes the customer id from the token manager done
-        String customerId = future.join();
+        Event resultEvent = future.join();
 
-        // 4. if not null, send the customer id and the merchant id to the account done
-        if (customerId.isEmpty()) {
-            throw new Exception("Invalid token");
-        }
-        return customerId;
+        return resultEvent.getArgument(0, Customer.class);
     }
 
-    public String getBankAccountIdById(String dtuPayId, String routingKey) throws Exception {
+    public Customer getCustomer(String customerId) {
         String correlationId = UUID.randomUUID().toString();
-        CompletableFuture<String> future = new CompletableFuture<>();
+        CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        Event event = new Event("payments." + routingKey + ".request", new Object[] { dtuPayId, correlationId });
-        mq.publish(event);
+        mq.publish(new Event("facade.customer.request", new Object[] { customerId, correlationId }));
 
-        // 5. consumes the bank account if not null
-        String bankAccountId = future.join();
+        Event resultEvent = future.join();
 
-        if (bankAccountId.isEmpty()) {
-            throw new Exception("Unknown customer or merchant");
-        }
-        return bankAccountId;
+        return resultEvent.getArgument(0, Customer.class);
     }
 
-    // 1. consumes the token and merchant id and amount done
-    public void registerTransaction(Transaction transaction) throws Exception {
-        LOG.info("Getting customerId from token");
-        String customerId = getCustomerIdFromToken(transaction.tokenId());
-        LOG.info("Received: " + customerId);
+    public List<CustomerTransaction> getTransactionsForCustomer(String customerId) {
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<Event> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
 
-        LOG.info("Getting customer bank account id");
-        String customerBankAccountId = getBankAccountIdById(customerId, "customerbankaccount");
-        LOG.info("Received: " + customerBankAccountId);
-        LOG.info("Getting merchant bank account id");
-        String merchantBankAccountId = getBankAccountIdById(transaction.merchantId(), "merchantbankaccount");
-        LOG.info("Received: " + merchantBankAccountId);
+        mq.publish(new Event("facade.customerreport.request", new Object[] { customerId, correlationId }));
 
-        boolean transferSuccessful = bankClient.transfer(customerBankAccountId, merchantBankAccountId,
-                transaction.amount());
+        Event resultEvent = future.join();
 
-        LOG.info("Transfer successful? " + transferSuccessful);
+        CustomerTransaction[] array = resultEvent.getArgument(0, CustomerTransaction[].class);
 
-        if (transferSuccessful) {
-            // 7. send the transaction to the reporting service
-            LOG.info("Emitting event");
-            mq.publish(new Event("payments.transaction.report",
-                    new Object[] { customerId, transaction.merchantId(), transaction.amount().toString() }));
-            mq.publish(new Event("payments.transaction.status", new Object[] { "Bank transaction successful" }));
-        } else {
-            mq.publish(new Event("payments.transaction.status", new Object[] { "Bank transaction failed" }));
-        }
+        return Arrays.asList(array);
+    }
+
+    public void deleteCustomer(String customerId) {
+        mq.publish(new Event("facade.customer.delete", new Object[] { customerId }));
+    }
+
+
+    public List<String> createTokens(String customerId) {
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<Event> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+
+        mq.publish(new Event("facade.tokens.register", new Object[] { customerId, correlationId }));
+
+        Event resultEvent = future.join();
+
+        String[] tokens = resultEvent.getArgument(0, String[].class);
+        return Arrays.asList(tokens);
     }
 }
