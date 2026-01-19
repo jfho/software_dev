@@ -8,13 +8,11 @@ import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
 import dtu.Database;
-import jakarta.ws.rs.NotFoundException;
 
 public class CustomerService {
     private final Database db = Database.getInstance();
     MessageQueue queue;
 
-    
     private String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
     private String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
     private String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
@@ -41,8 +39,8 @@ public class CustomerService {
 
             Customer customer = getCustomer(customerId);
 
-            queue.publish(new Event(GET_CUSTOMER_RES_RK, new Object[] { customer, corrId } ));
-		});
+            queue.publish(new Event(GET_CUSTOMER_RES_RK, new Object[] { customer, corrId }));
+        });
 
         // register customer handler (facade)
         queue.addHandler(REGISTER_CUSTOMER_REQ_RK, e -> {
@@ -52,8 +50,8 @@ public class CustomerService {
 
             Customer newCustomer = registerCustomer(customerToRegister);
 
-            queue.publish(new Event(REGISTER_CUSTOMER_RES_RK, new Object[] { newCustomer, corrId } ));
-		});
+            queue.publish(new Event(REGISTER_CUSTOMER_RES_RK, new Object[] { newCustomer, corrId }));
+        });
 
         // delete customer handler (facade)
         queue.addHandler(DELETE_CUSTOMER_REQ_RK, e -> {
@@ -63,8 +61,8 @@ public class CustomerService {
 
             boolean success = deleteCustomer(customerId);
 
-            queue.publish(new Event(DELETE_CUSTOMER_RES_RK, new Object[] { success, corrId } ));
-		});
+            queue.publish(new Event(DELETE_CUSTOMER_RES_RK, new Object[] { success, corrId }));
+        });
 
         // get bankaccount from accountId (payment service)
         queue.addHandler(BANKACCOUNT_CUSTOMER_REQ_RK, e -> {
@@ -78,8 +76,8 @@ public class CustomerService {
                 bankAccountId = db.getCustomer(customerId).bankAccountUuid();
             }
 
-            queue.publish(new Event(BANKACCOUNT_CUSTOMER_RES_RK, new Object[] { bankAccountId, corrId } ));
-		});
+            queue.publish(new Event(BANKACCOUNT_CUSTOMER_RES_RK, new Object[] { bankAccountId, corrId }));
+        });
     }
 
     public Customer getCustomer(String customerId) {
@@ -88,11 +86,12 @@ public class CustomerService {
 
     public Customer registerCustomer(Customer customer) {
         String dtupayUuid = UUID.randomUUID().toString();
-        Customer registeredCustomer = new Customer(customer.firstName(), customer.lastName(), customer.cpr(), customer.bankAccountUuid(), dtupayUuid);
+        Customer registeredCustomer = new Customer(customer.firstName(), customer.lastName(), customer.cpr(),
+                customer.bankAccountUuid(), dtupayUuid);
         db.addCustomer(registeredCustomer);
         return registeredCustomer;
     }
-    
+
     public boolean deleteCustomer(String id) {
         return db.deleteCustomer(id);
     }

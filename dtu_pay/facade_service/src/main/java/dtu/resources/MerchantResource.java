@@ -10,6 +10,7 @@ import java.util.List;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -31,6 +32,10 @@ public class MerchantResource {
     @Path("/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Merchant getMerchant(@PathParam("merchantId") String merchantId) {
+        Merchant merchant = service.getMerchant(merchantId);
+        if (merchant == null) {
+            throw new NotFoundException("Merchant with id " + merchantId + " is unknown.");
+        }
         return service.getMerchant(merchantId);
     }
 
