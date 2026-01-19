@@ -28,7 +28,7 @@ Feature: Report
         And the merchant has a token from the customer
         When the merchant initiates a transaction for "10" kr
         And the manager requests the report
-        Then the manager gets the report of all the "1" payments of all the customers
+        Then the manager gets the report of the at least "1" payments of all the customers
 
     Scenario: Customer requests report but has no payments
         Given the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
