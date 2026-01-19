@@ -72,18 +72,7 @@ public class PaymentSteps {
         }
     }
 
-    @When("the merchant initiates a transaction for {string} kr using token id {string}")
-    public void payment_with_unknown_token(String amount, String tokenId) {
-        try {
-            merchantClient.pay(
-                tokenId,
-                state.merchant.dtupayUuid(),
-                new BigDecimal(amount)
-            );
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
+    
 
     @Then("an error message is returned saying {string}")
     public void error_message_returned(String msg) {
@@ -100,22 +89,13 @@ public class PaymentSteps {
         }
     }
     
-    @Given("the merchant initiates a transaction for {string} kr")
-    public void given_the_merchant_initiates_a_transaction_for_kr(String string) {
-        try {
-            merchantClient.pay(
-                state.tokens.get(0),
-                state.merchant.dtupayUuid(),
-                new BigDecimal(string)
-            );
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-
+    //@Given("the merchant initiates a transaction for {string} kr")
     @When("the merchant initiates a transaction for {string} kr")
     public void the_merchant_initiates_a_transaction_for_kr(String string) {
         try {
+            if (state.tokens == null || state.tokens.isEmpty()) {
+                state.tokens = new CustomerClient().getTokens(state.customer.dtupayUuid(), 6);
+            }
             merchantClient.pay(
                 state.tokens.get(0),
                 state.merchant.dtupayUuid(),
