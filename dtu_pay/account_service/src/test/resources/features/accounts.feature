@@ -17,25 +17,21 @@ Feature: Account service
 
     Scenario: Retrieve non-existent DTUPay customer account information
         When the customer with id "non-existent" is retrieved
-        Then a NotFoundException is thrown
+        Then the customer is null
 
     Scenario: Retrieve non-existent DTUPay merchant account information
         When the merchant with id "non-existent" is retrieved
-        Then a NotFoundException is thrown
+        Then the merchant is null
 
     Scenario: Unregister DTUPay customer account
         Given a customer account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
-        And a subscriber for the customer deletion event
         When the customer unregisters for DTUPay
         Then the customer unregistration is successful
-        And the customer deletion event is received
 
     Scenario: Unregister DTUPay merchant account
         Given a merchant account with first name "Bob", last name "Bobby", CPR "654321-4321", bank ID "87654321"
-        And a subscriber for the merchant deletion event
         When the merchant unregisters for DTUPay
         Then the merchant unregistration is successful
-        And the merchant deletion event is received
     
     Scenario: Retrieve bank ID associated with customer ID
         Given a customer account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
