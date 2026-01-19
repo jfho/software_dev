@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import dtu.adapters.Event;
-import dtu.adapters.MessageQueue;
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
 
 public class MockQueue implements MessageQueue {
 

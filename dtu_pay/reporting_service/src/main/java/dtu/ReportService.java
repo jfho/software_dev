@@ -64,12 +64,12 @@ public class ReportService {
 
         queue.addHandler(TRANSACTION_COMPLETED_RK, e -> {
             LOG.info("Received a transaction report");
-            String customerId = e.getArgument(0, String.class);
-            String merchantId = e.getArgument(1, String.class);
-            String amount = e.getArgument(2, String.class);
-            LOG.info("customerId: " + customerId + ", merchantId: " + merchantId + ", amount: " + amount);
+            RecordedPayment receivedPayment = e.getArgument(0, RecordedPayment.class);
+            String transactionId = UUID.randomUUID().toString();
+            RecordedPayment payment = new RecordedPayment(receivedPayment.customerId(), receivedPayment. merchantId(), receivedPayment.amount(), receivedPayment.tokenId(), transactionId);
 
-            RecordedPayment payment = new RecordedPayment(customerId, merchantId, amount);
+            LOG.info("customerId: " + payment.customerId() + ", merchantId: " + payment.merchantId() + ", amount: " + payment.amount());
+
             db.addPayment(payment);
 		});
     }

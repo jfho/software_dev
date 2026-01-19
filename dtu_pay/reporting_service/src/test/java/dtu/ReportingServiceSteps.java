@@ -16,7 +16,6 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import jakarta.ws.rs.NotFoundException;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
@@ -44,7 +43,8 @@ public class ReportingServiceSteps {
     private String MANAGER_GETTRANSACTIONS_RES = "reports.manager.response";
 
     Gson gson = new Gson();
-    Type recordedPaymentListType = new TypeToken<List<RecordedPayment>>(){}.getType();
+    Type recordedPaymentListType = new TypeToken<List<RecordedPayment>>() {
+    }.getType();
 
     List<RecordedPayment> retrievedPayments = null;
 
@@ -84,7 +84,8 @@ public class ReportingServiceSteps {
 
     @When("a payment event with amount {string} is received from ID {string} to {string}")
     public void paymentEventReceived(String amount, String customerId, String merchantId) {
-        Event event = new Event(TRANSACTION_COMPLETED_RK, new Object[] { customerId, merchantId, amount } );
+        RecordedPayment payment = new RecordedPayment(customerId, merchantId, amount, null, null);
+        Event event = new Event(TRANSACTION_COMPLETED_RK, new Object[] { payment, null });
         mq.publish(event);
     }
 
@@ -93,7 +94,7 @@ public class ReportingServiceSteps {
         mq.addHandler(MANAGER_GETTRANSACTIONS_RES, e -> {
             retrievedPayments = gson.fromJson(gson.toJson(e.getArgument(0, Object.class)), recordedPaymentListType);
         });
-        
+
         Event event = new Event(MANAGER_GETTRANSACTIONS_REQ, new Object[] { UUID.randomUUID().toString() });
         mq.publish(event);
     }
@@ -103,8 +104,9 @@ public class ReportingServiceSteps {
         mq.addHandler(CUSTOMER_GETTRANSACTIONS_RES, e -> {
             retrievedPayments = gson.fromJson(gson.toJson(e.getArgument(0, Object.class)), recordedPaymentListType);
         });
-        
-        Event event = new Event(CUSTOMER_GETTRANSACTIONS_REQ, new Object[] { customer1.dtupayUuid(), UUID.randomUUID().toString() });
+
+        Event event = new Event(CUSTOMER_GETTRANSACTIONS_REQ,
+                new Object[] { customer1.dtupayUuid(), UUID.randomUUID().toString() });
         mq.publish(event);
     }
 
@@ -113,8 +115,9 @@ public class ReportingServiceSteps {
         mq.addHandler(MERCHANT_GETTRANSACTIONS_RES, e -> {
             retrievedPayments = gson.fromJson(gson.toJson(e.getArgument(0, Object.class)), recordedPaymentListType);
         });
-        
-        Event event = new Event(MERCHANT_GETTRANSACTIONS_REQ, new Object[] { merchant1.dtupayUuid(), UUID.randomUUID().toString() });
+
+        Event event = new Event(MERCHANT_GETTRANSACTIONS_REQ,
+                new Object[] { merchant1.dtupayUuid(), UUID.randomUUID().toString() });
         mq.publish(event);
     }
 

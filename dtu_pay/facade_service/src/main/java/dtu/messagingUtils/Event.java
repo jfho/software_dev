@@ -1,4 +1,4 @@
-package dtu.adapters;
+package dtu.messagingUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
