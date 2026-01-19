@@ -80,7 +80,7 @@ public class TokenService {
         // initialize a thread-safe list
         List<String> generatedTokens = new CopyOnWriteArrayList<>();
         
-        int amountOfTokensToGenerate = Integer.min(6, amount);
+        int amountOfTokensToGenerate = Integer.min(6, Integer.max(amount, 0)); // clamp token generation to the range 0..6. Should cahnge
 
         for (int i = 0; i < amountOfTokensToGenerate; i++) {
             String t = createTokenID();
