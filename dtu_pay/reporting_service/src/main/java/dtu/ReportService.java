@@ -1,19 +1,17 @@
 package dtu;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import org.jboss.logging.Logger;
 
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
-import dtu.models.Customer;
 import dtu.models.Database;
 import dtu.models.MerchantTransaction;
 import dtu.models.RecordedPayment;
 import dtu.util.PaymentConverterMerchant;
-import jakarta.ws.rs.NotFoundException;
 
 public class ReportService {
     MessageQueue queue;
@@ -39,7 +37,7 @@ public class ReportService {
             String corrId = e.getArgument(1, String.class);
             LOG.info("merchantId: " + merchantId);
 
-            List<RecordedPayment> transactionList = getTransactionsForMerchant(merchantId);
+            List<MerchantTransaction> transactionList = getTransactionsForMerchant(merchantId);
             queue.publish(new Event(MERCHANT_GETTRANSACTIONS_RES, new Object[] { transactionList, corrId } ));
 
 		});
@@ -68,7 +66,9 @@ public class ReportService {
             LOG.info("Received a transaction report");
             RecordedPayment receivedPayment = e.getArgument(0, RecordedPayment.class);
             String transactionId = UUID.randomUUID().toString();
-            RecordedPayment payment = new RecordedPayment(receivedPayment.customerId(), receivedPayment. merchantId(), receivedPayment.amount(), receivedPayment.tokenId(), transactionId);
+            String timestamp = Instant.now().toString(); 
+
+            RecordedPayment payment = new RecordedPayment(receivedPayment.customerId(), receivedPayment. merchantId(), receivedPayment.amount(), receivedPayment.tokenId(), transactionId,timestamp);
 
             LOG.info("customerId: " + payment.customerId() + ", merchantId: " + payment.merchantId() + ", amount: " + payment.amount());
 
