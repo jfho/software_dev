@@ -31,3 +31,31 @@ Feature: Payment
         When the customer initiates a payment for "10" kr using merchant id "non-existent-id"
         Then the payment is not successful
         And an error message is returned saying "merchant with id \"non-existent-id\" is unknown"
+
+    Scenario: Payment fails due to insufficient funds
+        Given a customer bank account with first name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "5"
+        And a merchant bank account with first name "Caroline", last name "Strauss", CPR "654321-4321", and balance "1000"
+        And the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
+        And the merchant registers for DTUPay with first name "Caroline", last name "Strauss", CPR "654321-4321"
+        And the customer requests "5" tokens
+        When the customer performs a payment for "10" kr to the merchant
+        Then the payment is not successful
+        And an error message is returned saying "insufficient funds"
+
+    Scenario: Payment fails when token has already been used
+        Given a customer bank account with first name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "1000"
+        And a merchant bank account with first name "Caroline", last name "Strauss", CPR "654321-4321", and balance "1000"
+        And the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
+        And the merchant registers for DTUPay with first name "Caroline", last name "Strauss", CPR "654321-4321"
+        And the customer requests "1" tokens
+        When the customer performs a payment for "10" kr to the merchant
+        And the customer performs a payment for "10" kr to the merchant
+        Then the payment is not successful
+        And an error message is returned saying "token has already been used"
+
+    Scenario: Payment fails when token is unknown
+        Given a merchant bank account with first name "Caroline", last name "Strauss", CPR "654321-4321", and balance "1000"
+        And the merchant registers for DTUPay with first name "Caroline", last name "Strauss", CPR "654321-4321"
+        When the merchant initiates a payment for "10" kr using token id "non-existent-token"
+        Then the payment is not successful
+        And an error message is returned saying "token is unknown"

@@ -3,6 +3,8 @@ package dtu.Steps;
 import dtu.*;
 import dtu.Models.Transaction;
 import dtu.ws.fastmoney.Account;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 
 import java.math.BigDecimal;
@@ -40,5 +42,23 @@ public class PaymentSteps {
     @Then("the payment is not successful")
     public void payment_failed() {
         assertNotNull(state.lastException);
+    }
+
+    @Before
+    public void setup() {
+        state.tokens = null;
+        state.transactions = null;
+        state.lastException = null;
+    }
+
+    @After
+    public void cleanup() {
+        if (state.customer != null) {
+            bank.unregister(state.customer.bankAccountUuid());
+        }
+        if (state.merchant != null) {
+            merchantClient.unregister(state.merchant);
+            bank.unregister(state.merchant.bankAccountUuid());
+        }
     }
 }

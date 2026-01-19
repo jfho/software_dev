@@ -1,6 +1,8 @@
 package dtu.Steps;
 
 import dtu.*;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,5 +30,21 @@ public class TokenSteps {
     @Given("And the merchant has a token from the customer")
     public void merchant_has_token() {
         state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), 1);
+    }
+
+    @Before
+    public void setup() {
+        state.tokens = null;
+        state.transactions = null;
+        state.lastException = null;
+        state.customer = null;
+        state.merchant = null;
+    }
+
+    @After
+    public void cleanup() {
+        if (state.customer != null) {
+            customerClient.unregister(state.customer);
+        }
     }
 }

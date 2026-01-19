@@ -95,20 +95,22 @@ public class RegistrationSteps {
 
     @Before
     public void setup() {
-        customer = null;
-        merchant = null;
-        customerUuid = null;
-        merchantUuid = null;
+        state.tokens = null;
+        state.transactions = null;
+        state.lastException = null;
+        state.customer = null;
+        state.merchant = null;
     }
 
     @After
     public void cleanup() {
-        if (customerUuid != null) {
-            bank.unregister(customerUuid);
+        if (state.customer != null) {
+            customerClient.unregister(state.customer);
+            bank.unregister(state.customer.bankAccountUuid());
         }
-
-        if (merchantUuid != null) {
-            bank.unregister(merchantUuid);
+        if (state.merchant != null) {
+            merchantClient.unregister(state.merchant);
+            bank.unregister(state.merchant.bankAccountUuid());
         }
     }
 }

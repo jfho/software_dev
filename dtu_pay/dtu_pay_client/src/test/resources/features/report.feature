@@ -18,4 +18,13 @@ Feature: Report
         When the manager requests the report
         Then the manager gets the report of all the payments ("1") of all the customers
 
-        
+    Scenario: Customer requests report but has no payments
+        Given the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
+        When the customer requests the report
+        Then the customer gets an empty report
+    
+    Scenario: Report request fails for unknown customer
+        When the customer requests the report using customer id "non-existent-id"
+        Then the report request is not successful
+        And an error message is returned saying "customer with id \"non-existent-id\" is unknown"
+

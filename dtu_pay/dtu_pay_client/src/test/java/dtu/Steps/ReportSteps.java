@@ -1,6 +1,8 @@
 package dtu.Steps;
 
 import dtu.*;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,5 +46,24 @@ public class ReportSteps {
     @Then("the manager gets the report of all the payments {string} of all the customers")
     public void manager_report(String count) {
         assertEquals(Integer.parseInt(count), state.transactions.size());
+    }
+
+    @Before
+    public void setup() {
+        state.tokens = null;
+        state.transactions = null;
+        state.lastException = null;
+        state.customer = null;
+        state.merchant = null;
+    }
+
+    @After
+    public void cleanup() {
+        if (state.customer != null) {
+            customerClient.unregister(state.customer);
+        }
+        if (state.merchant != null) {
+            merchantClient.unregister(state.merchant);
+        }
     }
 }
