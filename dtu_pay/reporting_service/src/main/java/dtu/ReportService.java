@@ -62,6 +62,13 @@ public class ReportService {
         queue.addHandler(TRANSACTION_COMPLETED_RK, e -> {
             LOG.info("Received a transaction report");
             RecordedPayment receivedPayment = e.getArgument(0, RecordedPayment.class);
+
+            if (receivedPayment == null) {
+                // failed transaction - nothing to save
+                LOG.info("Ignoring failed transaction");
+                return;
+            }
+
             String transactionId = UUID.randomUUID().toString();
             RecordedPayment payment = new RecordedPayment(receivedPayment.customerId(), receivedPayment.merchantId(),
                     receivedPayment.amount(), receivedPayment.tokenId(), transactionId);
