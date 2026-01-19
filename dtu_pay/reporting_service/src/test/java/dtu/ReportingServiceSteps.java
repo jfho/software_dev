@@ -34,13 +34,13 @@ public class ReportingServiceSteps {
     Merchant merchant2 = null;
 
     private String TRANSACTION_COMPLETED_RK = "payments.transaction.response";
-    private String MERCHANT_GETTRANSACTIONS_REQ = "facade.merchant.request";
-    private String CUSTOMER_GETTRANSACTIONS_REQ = "facade.customer.request";
-    private String MANAGER_GETTRANSACTIONS_REQ = "facade.manager.request";
+    private String MERCHANT_GETTRANSACTIONS_REQ = "facade.merchantreport.request";
+    private String CUSTOMER_GETTRANSACTIONS_REQ = "facade.customerreport.request";
+    private String MANAGER_GETTRANSACTIONS_REQ = "facade.managerreport.request";
 
-    private String MERCHANT_GETTRANSACTIONS_RES = "reports.merchant.response";
-    private String CUSTOMER_GETTRANSACTIONS_RES = "reports.customer.response";
-    private String MANAGER_GETTRANSACTIONS_RES = "reports.manager.response";
+    private String MERCHANT_GETTRANSACTIONS_RES = "reports.merchantreport.response";
+    private String CUSTOMER_GETTRANSACTIONS_RES = "reports.customerreport.response";
+    private String MANAGER_GETTRANSACTIONS_RES = "reports.managerreport.response";
 
     Gson gson = new Gson();
     Type recordedPaymentListType = new TypeToken<List<RecordedPayment>>() {
