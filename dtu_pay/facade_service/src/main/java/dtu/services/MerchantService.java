@@ -29,7 +29,7 @@ public class MerchantService {
     private final String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
 
     private final String MERCHANT_REPORT_REQ_RK = "facade.merchantreport.request";
-    private final String MERCHANT_REPORT_RES_RK = "reports.merchant.response";
+    private final String MERCHANT_REPORT_RES_RK = "reports.merchantreport.response";
 
     private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
 

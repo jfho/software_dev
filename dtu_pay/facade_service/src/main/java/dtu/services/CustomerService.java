@@ -23,7 +23,7 @@ public class CustomerService {
 
     private final String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
     private final String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
-    private final String CUSTOMER_REPORT_RES_RK = "reports.customer.response";
+    private final String CUSTOMER_REPORT_RES_RK = "reports.customerreport.response";
     private final String TOKENS_REGISTER_RES_RK = "tokens.createtokens.response";
 
     private final String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
