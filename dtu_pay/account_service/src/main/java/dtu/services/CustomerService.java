@@ -74,7 +74,7 @@ public class CustomerService {
             LOG.info("customerId: " + customerId + ", corrId: " + corrId);
 
             String bankAccountId = null;
-            if (db.hasCustomer(customerId)) {
+            if (customerId != null && db.hasCustomer(customerId)) {
                 bankAccountId = db.getCustomer(customerId).bankAccountUuid();
             }
 
