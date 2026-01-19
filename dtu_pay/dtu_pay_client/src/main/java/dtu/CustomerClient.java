@@ -43,10 +43,11 @@ public class CustomerClient extends BaseClient {
     }
 
     public List<String> getTokens(String customerDtupayUuid, int amount) {
-        return r.path(CUSTOMERS_PATH + "/" + customerDtupayUuid + "/tokens")
-                    .queryParam("amount", amount)
+        Response res = r.path(CUSTOMERS_PATH + "/" + customerDtupayUuid + "/tokens")
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
-                    .get(new GenericType<List<String>>(){}); 
+                    .post(Entity.entity(String.valueOf(amount), MediaType.APPLICATION_JSON));
+        
+        return res.readEntity(new GenericType<List<String>>(){});
     }
 }
