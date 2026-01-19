@@ -5,6 +5,7 @@ import java.util.List;
 
 import dtu.Models.Customer;
 import dtu.Models.Merchant;
+import dtu.Models.MerchantTransaction;
 import dtu.Models.Transaction;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
@@ -37,8 +38,8 @@ public class MerchantClient extends BaseClient {
                     .get(Merchant.class);
     }
 
-    public Response pay(String tokenUuid, String merchantDtupayUuid, BigDecimal amount) {
-        Transaction transaction = new Transaction(tokenUuid, merchantDtupayUuid, amount);
+    public Response pay(String tokenUuid, String merchantDtupayUuid, String amount) {
+        MerchantTransaction transaction = new MerchantTransaction(tokenUuid, merchantDtupayUuid, amount);
         return r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/payments")
                     .request()
                     .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
