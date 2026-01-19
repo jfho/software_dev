@@ -20,8 +20,8 @@ public class PaymentService {
 
     private static final Logger LOG = Logger.getLogger(PaymentService.class);
 
-    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.register";
-    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.status";
+    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
+    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
 
     private final String TOKEN_CUSTOMERID_REQ_RK = "payments.customerid.request";
     private final String TOKEN_CUSTOMERID_RES_RK = "tokens.customerid.response";
@@ -30,8 +30,6 @@ public class PaymentService {
     private final String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
     private final String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
     private final String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
-
-    private final String PAYMENTS_REPORT_REQ_RK = "payments.transaction.report";
 
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
@@ -117,12 +115,11 @@ public class PaymentService {
 
         if (transferSuccessful) {
             LOG.info("Transaction complete. Emitting report.");
-            mq.publish(new Event(PAYMENTS_REPORT_REQ_RK,
-                    new Object[] { customerId, transaction }));
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { "Bank transaction successful" }));
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK,
+                    new Object[] { transaction, correlationId }));
         } else {
             LOG.warn("Transaction failed at bank level.");
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { "Bank transaction failed" }));
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { null, correlationId }));
         }
     }
 }
