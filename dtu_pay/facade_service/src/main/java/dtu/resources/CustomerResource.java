@@ -4,7 +4,6 @@ import dtu.CustomerService;
 import dtu.messagingUtils.implementations.RabbitMqQueue;
 import dtu.models.Customer;
 import dtu.models.CustomerTransaction;
-import dtu.models.MerchantTransaction;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/customers")
 public class CustomerResource {
-    private CustomerService service = new CustomerService(new RabbitMqQueue());
+    private static final CustomerService service = new CustomerService(new RabbitMqQueue());
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -37,7 +36,6 @@ public class CustomerResource {
 
     @DELETE
     @Path("/{customerId}")
-    @Consumes(MediaType.APPLICATION_JSON)
     public void deleteCustomer(@PathParam("customerId") String customerId) {
         service.deleteCustomer(customerId);
     }
@@ -51,7 +49,7 @@ public class CustomerResource {
 
     @POST
     @Path("/{customerId}/tokens")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public List<String> createTokens(@PathParam("customerId") String customerId) {
         return service.createTokens(customerId);
     }

@@ -18,7 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/merchants")
 public class MerchantResource {
-    private MerchantService service = new MerchantService(new RabbitMqQueue());
+    private static final MerchantService service = new MerchantService(new RabbitMqQueue());
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -36,7 +36,6 @@ public class MerchantResource {
 
     @DELETE
     @Path("/{merchantId}")
-    @Consumes(MediaType.APPLICATION_JSON)
     public void deleteMerchant(@PathParam("merchantId") String merchantId) {
         service.deleteMerchant(merchantId);
     }
@@ -51,7 +50,9 @@ public class MerchantResource {
     @POST
     @Path("/{merchantId}/payments")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void registerTransaction(MerchantTransaction transaction) {
+    public void registerTransaction(@PathParam("merchantId") String merchantId, String tokenId, String amount) {
+        MerchantTransaction transaction = new MerchantTransaction(tokenId, merchantId, amount, null, null);
+        
         service.registerTransaction(transaction);
     }
 }

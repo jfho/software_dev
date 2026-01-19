@@ -20,17 +20,18 @@ public class PaymentService {
 
     private static final Logger LOG = Logger.getLogger(PaymentService.class);
 
-    private final String PAYMENTS_REGISTER_REQ_RK = "facade.payments.register";
+    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.register";
+    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.status";
+
+    private final String TOKEN_CUSTOMERID_REQ_RK = "payments.customerid.request";
     private final String TOKEN_CUSTOMERID_RES_RK = "tokens.customerid.response";
+
+    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
+    private final String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
     private final String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
     private final String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
 
-    private final String TOKEN_CUSTOMERID_REQ_RK = "payments.customerid.request";
-    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private final String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
-
     private final String PAYMENTS_REPORT_REQ_RK = "payments.transaction.report";
-    private final String PAYMENTS_STATUS_REQ_RK = "payments.transaction.status";
 
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
@@ -44,9 +45,10 @@ public class PaymentService {
 
     public void handleRegistration(Event event) {
         Transaction transaction = event.getArgument(0, Transaction.class);
+        String correlationId = event.getArgument(1, String.class);
         try {
             LOG.info("Processing payment registration for amount: " + transaction.amount());
-            registerTransaction(transaction);
+            registerTransaction(transaction, correlationId);
         } catch (Exception e) {
             LOG.warn("Registering transaction failed: " + e.getMessage());
         }
@@ -80,7 +82,6 @@ public class PaymentService {
         return customerId;
     }
 
-    // Helper method: Takes the specific routing key for the request
     public String getBankAccountId(String dtuPayId, String routingKey) throws Exception {
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<String> future = new CompletableFuture<>();
@@ -96,7 +97,7 @@ public class PaymentService {
         return bankAccountId;
     }
 
-    public void registerTransaction(Transaction transaction) throws Exception {
+    public void registerTransaction(Transaction transaction, String correlationId) throws Exception {
         LOG.info("Step 1: resolving customerId from token...");
         String customerId = getCustomerIdFromToken(transaction.tokenId());
         LOG.info("Resolved CustomerId: " + customerId);
@@ -117,11 +118,11 @@ public class PaymentService {
         if (transferSuccessful) {
             LOG.info("Transaction complete. Emitting report.");
             mq.publish(new Event(PAYMENTS_REPORT_REQ_RK,
-                    new Object[] { customerId, transaction.merchantId(), transaction.amount().toString() }));
-            mq.publish(new Event(PAYMENTS_STATUS_REQ_RK, new Object[] { "Bank transaction successful" }));
+                    new Object[] { customerId, transaction }));
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { "Bank transaction successful" }));
         } else {
             LOG.warn("Transaction failed at bank level.");
-            mq.publish(new Event(PAYMENTS_STATUS_REQ_RK, new Object[] { "Bank transaction failed" }));
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { "Bank transaction failed" }));
         }
     }
 }

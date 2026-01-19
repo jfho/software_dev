@@ -21,18 +21,28 @@ public class CustomerService {
 
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
 
+    private final String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
+    private final String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
+    private final String CUSTOMER_REPORT_RES_RK = "reports.customer.response";
+    private final String TOKENS_REGISTER_RES_RK = "tokens.register.response";
+
+    private final String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
+    private final String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
+    private final String CUSTOMER_REPORT_REQ_RK = "facade.customerreport.request";
+    private final String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
+    private final String TOKENS_REGISTER_REQ_RK = "facade.tokens.register";
+
     public CustomerService(MessageQueue mq) {
         this.mq = mq;
-        this.mq.addHandler("accounts.registerCustomer.response", this::handleResponse);
-        this.mq.addHandler("accounts.getCustomer.response", this::handleResponse);
-        this.mq.addHandler("reports.customer.response", this::handleResponse);
-
-        this.mq.addHandler("tokens.register.response", this::handleResponse);
+        this.mq.addHandler(REGISTER_CUSTOMER_RES_RK, this::handleResponse);
+        this.mq.addHandler(GET_CUSTOMER_RES_RK, this::handleResponse);
+        this.mq.addHandler(CUSTOMER_REPORT_RES_RK, this::handleResponse);
+        this.mq.addHandler(TOKENS_REGISTER_RES_RK, this::handleResponse);
     }
-    
 
     public void handleResponse(Event event) {
         String correlationId = event.getArgument(1, String.class);
+        LOG.info("Received response event: " + event.getType() + " with CorrelationID: " + correlationId);
 
         CompletableFuture<Event> future = pendingRequests.remove(correlationId);
 
@@ -44,58 +54,74 @@ public class CustomerService {
     }
 
     public Customer registerCustomer(Customer customer) {
+        LOG.info("Requesting registration for customer: " + customer);
+
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.customer.register", new Object[] { customer, correlationId }));
+        mq.publish(new Event(REGISTER_CUSTOMER_REQ_RK, new Object[] { customer, correlationId }));
 
         Event resultEvent = future.join();
 
-        return resultEvent.getArgument(0, Customer.class);
+        Customer result = resultEvent.getArgument(0, Customer.class);
+        LOG.info("Customer registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
+
+        return result;
     }
 
     public Customer getCustomer(String customerId) {
+        LOG.info("Fetching details for customer ID: " + customerId);
+
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.customer.request", new Object[] { customerId, correlationId }));
+        mq.publish(new Event(GET_CUSTOMER_REQ_RK, new Object[] { customerId, correlationId }));
 
         Event resultEvent = future.join();
+        LOG.info("Details retrieved for customer ID: " + customerId);
 
         return resultEvent.getArgument(0, Customer.class);
     }
 
     public List<CustomerTransaction> getTransactionsForCustomer(String customerId) {
+        LOG.info("Requesting transaction report for customer ID: " + customerId);
+
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.customerreport.request", new Object[] { customerId, correlationId }));
+        mq.publish(new Event(CUSTOMER_REPORT_REQ_RK, new Object[] { customerId, correlationId }));
 
         Event resultEvent = future.join();
 
         CustomerTransaction[] array = resultEvent.getArgument(0, CustomerTransaction[].class);
+        LOG.info("Report received for customer ID: " + customerId + ". Transactions found: "
+                + (array != null ? array.length : 0));
 
         return Arrays.asList(array);
     }
 
     public void deleteCustomer(String customerId) {
-        mq.publish(new Event("facade.customer.delete", new Object[] { customerId }));
+        LOG.info("Requesting deletion for customer ID: " + customerId);
+        mq.publish(new Event(DELETE_CUSTOMER_REQ_RK, new Object[] { customerId }));
     }
 
-
     public List<String> createTokens(String customerId) {
+        LOG.info("Requesting new tokens for customer ID: " + customerId);
+
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.tokens.register", new Object[] { customerId, correlationId }));
+        mq.publish(new Event(TOKENS_REGISTER_REQ_RK, new Object[] { customerId, correlationId }));
 
         Event resultEvent = future.join();
 
         String[] tokens = resultEvent.getArgument(0, String[].class);
+        LOG.info("Tokens generated successfully. Count: " + (tokens != null ? tokens.length : 0));
+
         return Arrays.asList(tokens);
     }
 }

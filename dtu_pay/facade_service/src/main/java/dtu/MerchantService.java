@@ -13,6 +13,7 @@ import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Merchant;
 import dtu.models.MerchantTransaction;
+import dtu.models.Transaction;
 
 public class MerchantService {
     MessageQueue mq;
@@ -23,7 +24,7 @@ public class MerchantService {
 
     private final String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
     private final String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
-    
+
     private final String GET_MERCHANT_REQ_RK = "facade.getMerchant.request";
     private final String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
 
@@ -31,13 +32,16 @@ public class MerchantService {
     private final String MERCHANT_REPORT_RES_RK = "reports.merchant.response";
 
     private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
-    private final String REGISTER_PAYMENT_REQ_RK = "facade.payments.register";
+
+    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.register";
+    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.status";
 
     public MerchantService(MessageQueue mq) {
         this.mq = mq;
         this.mq.addHandler(REGISTER_MERCHANT_RES_RK, this::handleResponse);
         this.mq.addHandler(GET_MERCHANT_RES_RK, this::handleResponse);
         this.mq.addHandler(MERCHANT_REPORT_RES_RK, this::handleResponse);
+        this.mq.addHandler(PAYMENTS_REGISTER_RES_RK, this::handleResponse);
     }
 
     public void handleResponse(Event event) {
@@ -55,7 +59,7 @@ public class MerchantService {
 
     public Merchant registerMerchant(Merchant merchant) {
         LOG.info("Requesting registration for merchant: " + merchant);
-        
+
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
@@ -97,8 +101,9 @@ public class MerchantService {
         Event resultEvent = future.join();
 
         MerchantTransaction[] array = resultEvent.getArgument(0, MerchantTransaction[].class);
-        
-        LOG.info("Report received for merchant ID: " + merchantId + ". Transactions found: " + (array != null ? array.length : 0));
+
+        LOG.info("Report received for merchant ID: " + merchantId + ". Transactions found: "
+                + (array != null ? array.length : 0));
 
         return Arrays.asList(array);
     }
@@ -108,8 +113,23 @@ public class MerchantService {
         mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId }));
     }
 
-    public void registerTransaction(MerchantTransaction transaction) {
+    public boolean registerTransaction(MerchantTransaction transaction) {
         LOG.info("Registering new transaction: " + transaction);
-        mq.publish(new Event(REGISTER_PAYMENT_REQ_RK, new Object[] { transaction }));
+
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<Event> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+
+        mq.publish(new Event(PAYMENTS_REGISTER_REQ_RK, new Object[] { transaction, correlationId }));
+
+        Event resultEvent = future.join();
+        Transaction resultTransaction = resultEvent.getArgument(0, Transaction.class);
+        if (resultTransaction == null) {
+            LOG.warn("Transaction failed!");
+            return false;
+        } else {
+            LOG.info("Transaction with ID " + transaction.transactionId() + " succeeded!");
+            return true;
+        }
     }
 }
