@@ -5,7 +5,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.UUID;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -21,7 +26,7 @@ import dtu.models.RecordedPayment;
 
 public class ReportingServiceSteps {
     Database db = Database.getInstance();
-    ReportService controller;
+    ReportService reportService;
     MessageQueue mq;
 
     Customer customer1 = null;
@@ -29,9 +34,19 @@ public class ReportingServiceSteps {
     Merchant merchant1 = null;
     Merchant merchant2 = null;
 
-    List<RecordedPayment> retrievedPayments = null;
+    private String TRANSACTION_COMPLETED_RK = "payments.transaction.response";
+    private String MERCHANT_GETTRANSACTIONS_REQ = "facade.merchant.request";
+    private String CUSTOMER_GETTRANSACTIONS_REQ = "facade.customer.request";
+    private String MANAGER_GETTRANSACTIONS_REQ = "facade.manager.request";
 
-    private String TRANSACTION_COMPLETED_RK = "payments.transaction.report";
+    private String MERCHANT_GETTRANSACTIONS_RES = "reports.merchant.response";
+    private String CUSTOMER_GETTRANSACTIONS_RES = "reports.customer.response";
+    private String MANAGER_GETTRANSACTIONS_RES = "reports.manager.response";
+
+    Gson gson = new Gson();
+    Type recordedPaymentListType = new TypeToken<List<RecordedPayment>>(){}.getType();
+
+    List<RecordedPayment> retrievedPayments = null;
 
     @Before
     public void setup() {
@@ -43,7 +58,7 @@ public class ReportingServiceSteps {
         retrievedPayments = null;
 
         mq = new MockQueue();
-        controller = new ReportService(mq);
+        reportService = new ReportService(mq);
         db.clean();
     }
 
@@ -75,17 +90,32 @@ public class ReportingServiceSteps {
 
     @When("the manager requests a list of payments")
     public void managerRequestsListOfPayments() {
-        retrievedPayments = controller.getAllTransactions();
+        mq.addHandler(MANAGER_GETTRANSACTIONS_RES, e -> {
+            retrievedPayments = gson.fromJson(gson.toJson(e.getArgument(0, Object.class)), recordedPaymentListType);
+        });
+        
+        Event event = new Event(MANAGER_GETTRANSACTIONS_REQ, new Object[] { UUID.randomUUID().toString() });
+        mq.publish(event);
     }
 
     @When("the customer requests a list of payments")
     public void customerRequestsListOfPayments() {
-        retrievedPayments = controller.getTransactionsForCustomer(customer1.dtupayUuid());
+        mq.addHandler(CUSTOMER_GETTRANSACTIONS_RES, e -> {
+            retrievedPayments = gson.fromJson(gson.toJson(e.getArgument(0, Object.class)), recordedPaymentListType);
+        });
+        
+        Event event = new Event(CUSTOMER_GETTRANSACTIONS_REQ, new Object[] { customer1.dtupayUuid(), UUID.randomUUID().toString() });
+        mq.publish(event);
     }
 
     @When("the merchant requests a list of payments")
     public void the_merchant_requests_a_list_of_payments() {
-        retrievedPayments = controller.getTransactionsForMerchant(merchant1.dtupayUuid());
+        mq.addHandler(MERCHANT_GETTRANSACTIONS_RES, e -> {
+            retrievedPayments = gson.fromJson(gson.toJson(e.getArgument(0, Object.class)), recordedPaymentListType);
+        });
+        
+        Event event = new Event(MERCHANT_GETTRANSACTIONS_REQ, new Object[] { merchant1.dtupayUuid(), UUID.randomUUID().toString() });
+        mq.publish(event);
     }
 
     @Then("the list contains {int} payments with amounts {string}, {string}, {string}")
@@ -93,5 +123,7 @@ public class ReportingServiceSteps {
         assertNotNull(retrievedPayments);
         assertEquals(size.intValue(), retrievedPayments.size());
         assertEquals(amount1, retrievedPayments.get(0).amount());
+        assertEquals(amount2, retrievedPayments.get(1).amount());
+        assertEquals(amount3, retrievedPayments.get(2).amount());
     }
 }

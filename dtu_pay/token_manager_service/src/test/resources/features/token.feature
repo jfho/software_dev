@@ -38,6 +38,12 @@ Feature: Token
     Scenario: Send customerId associated with a token
         Given a customerId "134" with "6" tokens
         And a token is known to a merchant
-        And a subscriber for the customerId response event
-        When a request customerId event with the known token and correlation ID "6767676" is emitted
-        Then a customerId response event with customerId "134" and correlation ID "6767676" is emitted
+        When the payment service requests a customerId
+        Then a customerId response includes the customerId "134"
+
+    Scenario: Send token list to customer
+        Given a customerId "345" with no tokens
+        When the customer requests tokens
+        Then the service generates a list of tokens
+        And a tokens response includes the list of tokens
+        

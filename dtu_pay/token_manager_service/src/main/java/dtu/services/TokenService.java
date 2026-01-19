@@ -24,8 +24,8 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String createTokensRequest = "facade.createTokens.request";
-    private String createTokensResponse = "tokens.createTokens.response";
+    private String createTokensRequest = "facade.createtokens.request";
+    private String createTokensResponse = "tokens.createtokens.response";
     private String customerIdRequest = "payments.customerid.request";
     private String customerIdResponse = "tokens.customerid.response";
 
@@ -41,9 +41,10 @@ public class TokenService {
     public void policyCreateTokens(Event event) {
         LOG.info("Creating tokens");
         String customerId = event.getArgument(0, String.class);
-        String corrId = event.getArgument(1, String.class);
+        int amount = event.getArgument(1, Integer.class);
+        String corrId = event.getArgument(2, String.class);
         
-        List<String> tokenList = createTokens(customerId, 6);
+        List<String> tokenList = createTokens(customerId, amount);
 
         LOG.info("publishing token list");
         queue.publish(new Event(createTokensResponse, new Object[] {tokenList, corrId} )); 
@@ -79,7 +80,7 @@ public class TokenService {
         // initialize a thread-safe list
         List<String> generatedTokens = new CopyOnWriteArrayList<>();
         
-        int amountOfTokensToGenerate = Integer.min(6, amount);
+        int amountOfTokensToGenerate = Integer.min(6, Integer.max(amount, 0)); // clamp token generation to the range 0..6. Should cahnge
 
         for (int i = 0; i < amountOfTokensToGenerate; i++) {
             String t = createTokenID();
