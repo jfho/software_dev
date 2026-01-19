@@ -49,8 +49,9 @@ public class CustomerResource {
 
     @POST
     @Path("/{customerId}/tokens")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> createTokens(@PathParam("customerId") String customerId) {
-        return service.createTokens(customerId);
+    public List<String> createTokens(@PathParam("customerId") String customerId, String amount) {
+        return service.createTokens(customerId, Integer.parseInt(amount));
     }
 }

@@ -24,13 +24,13 @@ public class CustomerService {
     private final String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
     private final String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
     private final String CUSTOMER_REPORT_RES_RK = "reports.customer.response";
-    private final String TOKENS_REGISTER_RES_RK = "tokens.register.response";
+    private final String TOKENS_REGISTER_RES_RK = "tokens.createtokens.response";
 
     private final String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
     private final String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
     private final String CUSTOMER_REPORT_REQ_RK = "facade.customerreport.request";
     private final String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
-    private final String TOKENS_REGISTER_REQ_RK = "facade.tokens.register";
+    private final String TOKENS_REGISTER_REQ_RK = "facade.createtokens.request";
 
     public CustomerService(MessageQueue mq) {
         this.mq = mq;
@@ -108,14 +108,14 @@ public class CustomerService {
         mq.publish(new Event(DELETE_CUSTOMER_REQ_RK, new Object[] { customerId }));
     }
 
-    public List<String> createTokens(String customerId) {
+    public List<String> createTokens(String customerId, int amount) {
         LOG.info("Requesting new tokens for customer ID: " + customerId);
 
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event(TOKENS_REGISTER_REQ_RK, new Object[] { customerId, correlationId }));
+        mq.publish(new Event(TOKENS_REGISTER_REQ_RK, new Object[] { customerId, amount, correlationId }));
 
         Event resultEvent = future.join();
 
