@@ -53,49 +53,44 @@ public class PaymentSteps {
 
     @When("the merchant initiates a transaction for {string} kr")
     public void merchantInitiatesTransaction(String amount) {
-        Response response = merchantClient.pay(
-            state.tokens.get(0),
-            state.merchant.dtupayUuid(),
-            amount
-        );
-
-        if (response.getStatus() >= 400) {
+        try {
+            paymentSuccessful = merchantClient.pay(
+                state.tokens.get(0),
+                state.merchant.dtupayUuid(),
+                amount
+            );
+        } catch (Exception e) {
             paymentSuccessful = false;
-            state.errorMessage = response.readEntity(String.class);
-        } else {
-            paymentSuccessful = true;
+            state.lastException = e;
         }
     }
 
     @When("the merchant initiates a transaction for {string} kr using token id {string}")
     public void merchantInitiatesTransactionWithToken(String amount, String tokenId) {
-        Response response = merchantClient.pay(
-            tokenId,
-            state.merchant.dtupayUuid(),
-            amount
-        );
-
-        if (response.getStatus() >= 400) {
+        try {
+            paymentSuccessful = merchantClient.pay(
+                tokenId,
+                state.merchant.dtupayUuid(),
+                amount
+            );
+        } catch (Exception e) {
             paymentSuccessful = false;
-            state.errorMessage = response.readEntity(String.class);
-        } else {
-            paymentSuccessful = true;
+            state.lastException = e;
         }
     }
 
     @When("a payment is initiated for {string} kr using merchant id {string}")
     public void paymentWithUnknownMerchant(String amount, String merchantId) {
-        Response response = merchantClient.pay(
-            state.tokens.get(0),
-            merchantId,
-            amount
-        );
+        try {
+            paymentSuccessful = merchantClient.pay(
+                state.tokens.get(0),
+                merchantId,
+                amount
+            );
 
-        if (response.getStatus() >= 400) {
+        } catch (Exception e) {
             paymentSuccessful = false;
-            state.errorMessage = response.readEntity(String.class);
-        } else {
-            paymentSuccessful = true;
+            state.lastException = e;
         }
     }
 

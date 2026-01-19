@@ -75,6 +75,8 @@ public class RegistrationSteps {
         try {
             state.customer = customerClient.register(customer);
         } catch (Exception e) {
+            System.out.println("OK we hit an exeception");
+            System.out.println(e.getMessage());
             state.lastException = e;
         }
     }
@@ -139,7 +141,9 @@ public class RegistrationSteps {
 
     @Then("an error message is returned saying {string}")
     public void errorMessageReturned(String msg) {
-        assertNotNull(state.errorMessage);
-        assertTrue(state.errorMessage.contains(msg));
+        System.out.println("Is null: " + (state.lastException == null));
+        assertNotNull(state.lastException);
+        System.out.println("msg: " + state.lastException.getMessage());
+        assertTrue(state.lastException.getMessage().contains(msg));
     }
 }

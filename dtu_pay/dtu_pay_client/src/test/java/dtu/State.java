@@ -14,6 +14,4 @@ public class State {
     public List<Transaction> transactions;
 
     public Exception lastException;
-
-    public String errorMessage;
 }

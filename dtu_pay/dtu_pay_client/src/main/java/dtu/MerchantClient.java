@@ -18,9 +18,12 @@ public class MerchantClient extends BaseClient {
 
     public Merchant register(Merchant merchant) {
         Response res = r.path(MERCHANTS_PATH)
-                    .request()
-                    .post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
+                        .request()
+                        .post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
 
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
         return res.readEntity(Merchant.class);
     }
 
@@ -32,23 +35,38 @@ public class MerchantClient extends BaseClient {
     }
 
     public Merchant getMerchant(String merchantDtupayUuid) {
-        return r.path(MERCHANTS_PATH )
+        Response res = r.path(MERCHANTS_PATH)
                     .path(merchantDtupayUuid)
                     .request()
-                    .get(Merchant.class);
+                    .get();
+        
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
+        return res.readEntity(Merchant.class);
     }
 
-    public Response pay(String tokenUuid, String merchantDtupayUuid, String amount) {
+    public boolean pay(String tokenUuid, String merchantDtupayUuid, String amount) {
         MerchantTransaction transaction = new MerchantTransaction(tokenUuid, merchantDtupayUuid, amount);
-        return r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/payments")
-                    .request()
-                    .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+        Response res = r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/payments")
+                        .request()
+                        .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+        
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
+        return res.readEntity(Boolean.class);
     }
 
     public List<Transaction> getReports(String merchantDtupayUuid) {
-        return r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/reports")
+        Response res = r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/reports")
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
-                    .get(new GenericType<List<Transaction>>(){}); 
+                    .get();
+        
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
+        return res.readEntity(new GenericType<List<Transaction>>(){}); 
     }
 }

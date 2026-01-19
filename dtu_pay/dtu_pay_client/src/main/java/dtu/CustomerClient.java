@@ -18,6 +18,9 @@ public class CustomerClient extends BaseClient {
                     .request()
                     .post(Entity.entity(customer, MediaType.APPLICATION_JSON));
         
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
         return res.readEntity(Customer.class);
 	}
 
@@ -29,17 +32,27 @@ public class CustomerClient extends BaseClient {
     }
 
     public Customer getCustomer(String customerDtupayUuid) {
-        return r.path(CUSTOMERS_PATH )
+        Response res = r.path(CUSTOMERS_PATH)
                     .path(customerDtupayUuid)
                     .request()
-                    .get(Customer.class);
+                    .get();
+        
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
+        return res.readEntity(Customer.class);
     }
 
     public List<Transaction> getReports(String customerDtupayUuid) {
-        return r.path(CUSTOMERS_PATH + "/" + customerDtupayUuid + "/reports")
+        Response res = r.path(CUSTOMERS_PATH + "/" + customerDtupayUuid + "/reports")
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
-                    .get(new GenericType<List<Transaction>>(){}); 
+                    .get();
+        
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
+        return res.readEntity(new GenericType<List<Transaction>>(){}); 
     }
 
     public List<String> getTokens(String customerDtupayUuid, int amount) {
@@ -48,6 +61,9 @@ public class CustomerClient extends BaseClient {
                     .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(String.valueOf(amount), MediaType.APPLICATION_JSON));
         
+        if (res.getStatus() >= 400) {
+            throw new RuntimeException(res.readEntity(String.class));
+        }
         return res.readEntity(new GenericType<List<String>>(){});
     }
 }
