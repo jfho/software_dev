@@ -73,8 +73,15 @@ public class MerchantService {
 
         Event resultEvent = future.join();
         Merchant result = resultEvent.getArgument(0, Merchant.class);
-
         LOG.info("Merchant registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
+
+        if (result == null) {
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("merchant registration failed")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
+        }
 
         return result;
     }

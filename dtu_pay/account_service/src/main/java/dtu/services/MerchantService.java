@@ -86,6 +86,10 @@ public class MerchantService {
     }
 
     public Merchant registerMerchant(Merchant merchant) {
+        if (db.hasMerchantWithCpr(merchant.cpr())) {
+            return null;
+        }
+        
         String dtupayUuid = UUID.randomUUID().toString();
         Merchant registeredMerchant = new Merchant(merchant.firstName(), merchant.lastName(), merchant.cpr(), merchant.bankAccountUuid(), dtupayUuid);
         db.addMerchant(registeredMerchant);
