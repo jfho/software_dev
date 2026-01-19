@@ -26,7 +26,7 @@ import dtu.models.RecordedPayment;
 
 public class ReportingServiceSteps {
     Database db = Database.getInstance();
-    ReportService controller;
+    ReportService reportService;
     MessageQueue mq;
 
     Customer customer1 = null;
@@ -58,7 +58,7 @@ public class ReportingServiceSteps {
         retrievedPayments = null;
 
         mq = new MockQueue();
-        controller = new ReportService(mq);
+        reportService = new ReportService(mq);
         db.clean();
     }
 
