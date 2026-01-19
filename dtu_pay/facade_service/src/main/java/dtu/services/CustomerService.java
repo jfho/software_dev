@@ -24,6 +24,7 @@ public class CustomerService {
     private final String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
     private final String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
     private final String CUSTOMER_REPORT_RES_RK = "reports.customerreport.response";
+    private final String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
     private final String TOKENS_REGISTER_RES_RK = "tokens.createtokens.response";
 
     private final String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
@@ -37,6 +38,7 @@ public class CustomerService {
         this.mq.addHandler(REGISTER_CUSTOMER_RES_RK, this::handleResponse);
         this.mq.addHandler(GET_CUSTOMER_RES_RK, this::handleResponse);
         this.mq.addHandler(CUSTOMER_REPORT_RES_RK, this::handleResponse);
+        this.mq.addHandler(DELETE_CUSTOMER_RES_RK, this::handleResponse);
         this.mq.addHandler(TOKENS_REGISTER_RES_RK, this::handleResponse);
     }
 
@@ -103,9 +105,20 @@ public class CustomerService {
         return Arrays.asList(array);
     }
 
-    public void deleteCustomer(String customerId) {
+    public boolean deleteCustomer(String customerId) {
         LOG.info("Requesting deletion for customer ID: " + customerId);
-        mq.publish(new Event(DELETE_CUSTOMER_REQ_RK, new Object[] { customerId }));
+        
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<Event> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+
+        mq.publish(new Event(DELETE_CUSTOMER_REQ_RK, new Object[] { customerId, correlationId }));
+        
+        Event resultEvent = future.join();
+        boolean success = resultEvent.getArgument(0, Boolean.class);
+        LOG.info("received: success = " + true);
+
+        return success;
     }
 
     public List<String> createTokens(String customerId, int amount) {

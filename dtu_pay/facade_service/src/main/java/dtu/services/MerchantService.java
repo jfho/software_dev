@@ -32,6 +32,7 @@ public class MerchantService {
     private final String MERCHANT_REPORT_RES_RK = "reports.merchantreport.response";
 
     private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
+    private final String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
 
     private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
     private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
@@ -40,6 +41,7 @@ public class MerchantService {
         this.mq = mq;
         this.mq.addHandler(REGISTER_MERCHANT_RES_RK, this::handleResponse);
         this.mq.addHandler(GET_MERCHANT_RES_RK, this::handleResponse);
+        this.mq.addHandler(DELETE_MERCHANT_RES_RK, this::handleResponse);
         this.mq.addHandler(MERCHANT_REPORT_RES_RK, this::handleResponse);
         this.mq.addHandler(PAYMENTS_REGISTER_RES_RK, this::handleResponse);
     }
@@ -108,9 +110,20 @@ public class MerchantService {
         return Arrays.asList(array);
     }
 
-    public void deleteMerchant(String merchantId) {
+    public boolean deleteMerchant(String merchantId) {
         LOG.info("Requesting deletion for merchant ID: " + merchantId);
-        mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId }));
+
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<Event> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+
+        mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId, correlationId }));
+
+        Event resultEvent = future.join();
+        boolean success = resultEvent.getArgument(0, Boolean.class);
+        LOG.info("received: success = " + true);
+
+        return success;
     }
 
     public boolean registerTransaction(MerchantTransaction transaction) {
