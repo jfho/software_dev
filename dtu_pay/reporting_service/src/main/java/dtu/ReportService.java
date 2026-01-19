@@ -10,7 +10,9 @@ import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
 import dtu.models.Database;
+import dtu.models.MerchantTransaction;
 import dtu.models.RecordedPayment;
+import dtu.util.PaymentConverterMerchant;
 import jakarta.ws.rs.NotFoundException;
 
 public class ReportService {
@@ -83,8 +85,9 @@ public class ReportService {
         return payments.stream().filter(p -> p.customerId().equals(customerId)).toList();
     }
 
-    public List<RecordedPayment> getTransactionsForMerchant(String merchantId) {
+    public List<MerchantTransaction> getTransactionsForMerchant(String merchantId) {
         List<RecordedPayment> payments = db.listPayments();
-        return payments.stream().filter(p -> p.merchantId().equals(merchantId)).toList();
+        List<MerchantTransaction> merchantTransactions = PaymentConverterMerchant.toMerchantTransactions(payments);
+        return merchantTransactions.stream().filter(p -> p.merchantId().equals(merchantId)).toList();
     }
 }
