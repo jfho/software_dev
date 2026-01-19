@@ -1,3 +1,4 @@
+@registration
 Feature: Registration
     Scenario: Register DTUPay customer account
         Given a customer bank account with first name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "1000"

@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.logging.Logger;
 
 import dtu.models.CustomerTransaction;
+import jakarta.ws.rs.BadRequestException;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
@@ -134,6 +135,10 @@ public class CustomerService {
 
         String[] tokens = resultEvent.getArgument(0, String[].class);
         LOG.info("Tokens generated successfully. Count: " + (tokens != null ? tokens.length : 0));
+
+        if (tokens.length == 0) {
+            throw new BadRequestException("invalid token request");
+        }
 
         return Arrays.asList(tokens);
     }

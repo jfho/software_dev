@@ -6,6 +6,7 @@ import dtu.ws.fastmoney.Account;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
+import jakarta.ws.rs.core.Response;
 
 import java.math.BigDecimal;
 
@@ -15,127 +16,108 @@ public class PaymentSteps {
 
     private final State state;
     private BankClient bank = new BankClient();
+    private final CustomerClient customerClient = new CustomerClient();
     private final MerchantClient merchantClient = new MerchantClient();
 
+    boolean paymentSuccessful = false;
+    
     public PaymentSteps(State state) {
         this.state = state;
     }
 
-    /*@When("the customer performs a payment for {string} kr to the merchant")
-    public void customer_pays(String amount) {
-        try{
-            merchantClient.pay(
-                state.tokens.get(0),
-                state.merchant.dtupayUuid(),
-                new BigDecimal(amount)
-            );
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-    */
-    @Then("the balance of the customer at the bank is {string} kr")
-    public void customer_balance(String expected) {
-        try{
-            Account customerAccount = bank.getAccount(state.customer.bankAccountUuid());
-            assertEquals(new BigDecimal(expected), customerAccount.getBalance());
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-
-    @Then("the balance of the merchant at the bank is {string} kr")
-    public void merchant_balance(String expected) {
-        try{
-            Account merchantAccount = bank.getAccount(state.merchant.bankAccountUuid());
-            assertEquals(new BigDecimal(expected), merchantAccount.getBalance());
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-
-    @Then("the payment is not successful")
-    public void payment_failed() {
-        assertNotNull(state.lastException);
-    }
-
-    @When("a payment is initiated for {string} kr using merchant id {string}")
-    public void payment_with_unknown_merchant(String amount, String merchantId) {
-        try {
-            merchantClient.pay(
-                state.tokens.get(0),
-                merchantId,
-                new BigDecimal(amount)
-            );
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-
-    
-
-    @Then("an error message is returned saying {string}")
-    public void error_message_returned(String msg) {
-        assertNotNull(state.lastException);
-        assertTrue(state.lastException.getMessage().contains(msg));
-    }
-
-    @Given("the merchant has a token from the customer")
-    public void the_merchant_has_a_token_from_the_customer() {
-        try {
-            state.tokens = new CustomerClient().getTokens(state.customer.dtupayUuid(), 6);
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-    
-    //@Given("the merchant initiates a transaction for {string} kr")
-    @When("the merchant initiates a transaction for {string} kr")
-    public void the_merchant_initiates_a_transaction_for_kr(String string) {
-        try {
-            if (state.tokens == null || state.tokens.isEmpty()) {
-                state.tokens = new CustomerClient().getTokens(state.customer.dtupayUuid(), 6);
-            }
-            merchantClient.pay(
-                state.tokens.get(0),
-                state.merchant.dtupayUuid(),
-                new BigDecimal(string)
-            );
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-
-    @When("the merchant initiates a transaction for {string} kr using token id {string}")
-    public void the_merchant_initiates_a_transaction_for_kr_using_token_id(String string, String string2) {
-        try {
-            
-            merchantClient.pay(
-                string2,
-                state.merchant.dtupayUuid(),
-                new BigDecimal(string)
-            );
-        } catch (Exception e) {
-            state.lastException = e;
-        }
-    }
-
-
-    @Before
+    @Before("@payment")
     public void setup() {
+        paymentSuccessful = false;
+        
         state.tokens = null;
         state.transactions = null;
         state.lastException = null;
     }
 
-    @After
+    @After("@payment")
     public void cleanup() {
         if (state.customer != null) {
+            customerClient.unregister(state.customer);
             bank.unregister(state.customer.bankAccountUuid());
         }
         if (state.merchant != null) {
             merchantClient.unregister(state.merchant);
             bank.unregister(state.merchant.bankAccountUuid());
         }
+    }    
+
+    @Given("the merchant has a token from the customer")
+    public void merchantHasAToken() {
+        state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), 1);
+    }
+
+    @When("the merchant initiates a transaction for {string} kr")
+    public void merchantInitiatesTransaction(String amount) {
+        Response response = merchantClient.pay(
+            state.tokens.get(0),
+            state.merchant.dtupayUuid(),
+            amount
+        );
+
+        if (response.getStatus() >= 400) {
+            paymentSuccessful = false;
+            state.errorMessage = response.readEntity(String.class);
+        } else {
+            paymentSuccessful = true;
+        }
+    }
+
+    @When("the merchant initiates a transaction for {string} kr using token id {string}")
+    public void merchantInitiatesTransactionWithToken(String amount, String tokenId) {
+        Response response = merchantClient.pay(
+            tokenId,
+            state.merchant.dtupayUuid(),
+            amount
+        );
+
+        if (response.getStatus() >= 400) {
+            paymentSuccessful = false;
+            state.errorMessage = response.readEntity(String.class);
+        } else {
+            paymentSuccessful = true;
+        }
+    }
+
+    @When("a payment is initiated for {string} kr using merchant id {string}")
+    public void paymentWithUnknownMerchant(String amount, String merchantId) {
+        Response response = merchantClient.pay(
+            state.tokens.get(0),
+            merchantId,
+            amount
+        );
+
+        if (response.getStatus() >= 400) {
+            paymentSuccessful = false;
+            state.errorMessage = response.readEntity(String.class);
+        } else {
+            paymentSuccessful = true;
+        }
+    }
+
+    @Then("the balance of the customer at the bank is {string} kr")
+    public void customerBalance(String expected) {
+        Account customerAccount = bank.getAccount(state.customer.bankAccountUuid());
+        assertEquals(new BigDecimal(expected), customerAccount.getBalance());
+    }
+
+    @Then("the balance of the merchant at the bank is {string} kr")
+    public void merchantBalance(String expected) {
+        Account merchantAccount = bank.getAccount(state.merchant.bankAccountUuid());
+        assertEquals(new BigDecimal(expected), merchantAccount.getBalance());
+    }
+
+    @Then("the payment is successful")
+    public void paymentSuccess() {
+        assertTrue(paymentSuccessful);
+    }
+
+    @Then("the payment is not successful")
+    public void paymentFailed() {
+        assertFalse(paymentSuccessful);
     }
 }
