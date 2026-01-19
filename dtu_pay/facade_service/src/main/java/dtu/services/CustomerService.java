@@ -106,7 +106,7 @@ public class CustomerService {
         return Arrays.asList(array);
     }
 
-    public void deleteCustomer(String customerId) {
+    public boolean deleteCustomer(String customerId) {
         LOG.info("Requesting deletion for customer ID: " + customerId);
 
         String correlationId = UUID.randomUUID().toString();
@@ -117,7 +117,7 @@ public class CustomerService {
 
         Event resultEvent = future.join();
 
-        boolean success = resultEvent.getArgument(0, boolean.class);
+        return resultEvent.getArgument(0, boolean.class);
     }
 
     public List<String> createTokens(String customerId, TokenRequest request) {
