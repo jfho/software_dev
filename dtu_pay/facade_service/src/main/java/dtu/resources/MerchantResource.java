@@ -1,9 +1,9 @@
 package dtu.resources;
 
-import dtu.MerchantService;
 import dtu.messagingUtils.implementations.RabbitMqQueue;
 import dtu.models.Merchant;
 import dtu.models.MerchantTransaction;
+import dtu.services.MerchantService;
 
 import java.util.List;
 

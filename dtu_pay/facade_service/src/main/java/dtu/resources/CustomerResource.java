@@ -1,9 +1,9 @@
 package dtu.resources;
 
-import dtu.CustomerService;
 import dtu.messagingUtils.implementations.RabbitMqQueue;
 import dtu.models.Customer;
 import dtu.models.CustomerTransaction;
+import dtu.services.CustomerService;
 
 import java.util.List;
 

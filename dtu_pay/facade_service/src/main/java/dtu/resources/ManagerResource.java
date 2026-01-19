@@ -2,7 +2,7 @@ package dtu.resources;
 
 import dtu.messagingUtils.implementations.RabbitMqQueue;
 import dtu.models.Transaction;
-import dtu.ManagerService;
+import dtu.services.ManagerService;
 
 import java.util.List;
 
