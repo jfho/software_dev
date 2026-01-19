@@ -17,7 +17,7 @@ public class ReportService {
     MessageQueue queue;
     Database db = Database.getInstance();
 
-    private String TRANSACTION_COMPLETED_RK = "payments.transaction.report";
+    private String TRANSACTION_COMPLETED_RK = "payments.transaction.response";
     private String MERCHANT_GETTRANSACTIONS_REQ = "facade.merchant.request";
     private String CUSTOMER_GETTRANSACTIONS_REQ = "facade.customer.request";
     private String MANAGER_GETTRANSACTIONS_REQ = "facade.manager.request";
@@ -33,8 +33,8 @@ public class ReportService {
         
         queue.addHandler(MERCHANT_GETTRANSACTIONS_REQ, e -> {
             LOG.info("Received a merchant request");
-            String corrId = e.getArgument(0, String.class);
-            String merchantId = e.getArgument(1, String.class);
+            String merchantId = e.getArgument(0, String.class);
+            String corrId = e.getArgument(1, String.class);
             LOG.info("merchantId: " + merchantId);
 
             List<RecordedPayment> transactionList = getTransactionsForMerchant(merchantId);
@@ -44,8 +44,8 @@ public class ReportService {
 
         queue.addHandler(CUSTOMER_GETTRANSACTIONS_REQ, e -> {
             LOG.info("Received a customer request");
-            String corrId = e.getArgument(0, String.class);
-            String customerId = e.getArgument(1, String.class);
+            String customerId = e.getArgument(0, String.class);
+            String corrId = e.getArgument(1, String.class);
             LOG.info("customerId: " + customerId);
 
             List<RecordedPayment> transactionList = getTransactionsForCustomer(customerId);
