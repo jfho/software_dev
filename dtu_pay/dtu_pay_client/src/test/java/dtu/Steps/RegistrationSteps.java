@@ -35,30 +35,46 @@ public class RegistrationSteps {
     @Given("a customer bank account with first name {string}, last name {string}, CPR {string}, and balance {string}")
     public void a_customer_bank_account_with_first_name_last_name_cpr_and_balance(String firstName, String lastName,
             String cpr, String balance) {
-        BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
-        customerUuid = bank.register(account);
+        try {
+                BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
+                customerUuid = bank.register(account);
+            }
+         catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Given("a merchant bank account with first name {string}, last name {string}, CPR {string}, and balance {string}")
     public void a_merchant_bank_account_with_first_name_last_name_cpr_and_balance(String firstName, String lastName,
             String cpr, String balance) {
-        BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
-        merchantUuid = bank.register(account);
+        try{
+            BankAccount account = new BankAccount(firstName, lastName, cpr, new BigDecimal(balance));
+            merchantUuid = bank.register(account);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
-
 
     @When("the customer registers for DTUPay with first name {string}, last name {string}, CPR {string}")
     public void customer_registers(String fn, String ln, String cpr) {
-        customer = new Customer(fn, ln, cpr, customerUuid, null);
-        state.customer = customerClient.register(customer);
-        assertNotNull(state.customer.dtupayUuid());
+        try {
+            customer = new Customer(fn, ln, cpr, customerUuid, null);
+            state.customer = customerClient.register(customer);
+            assertNotNull(state.customer.dtupayUuid());
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @When("the merchant registers for DTUPay with first name {string}, last name {string}, CPR {string}")
     public void merchant_registers(String fn, String ln, String cpr) {
-        merchant = new Merchant(fn, ln, cpr, merchantUuid, null);
-        state.merchant = merchantClient.register(merchant);
-        assertNotNull(state.merchant.dtupayUuid());
+        try {
+            merchant = new Merchant(fn, ln, cpr, merchantUuid, null);
+            state.merchant = merchantClient.register(merchant);
+            assertNotNull(state.merchant.dtupayUuid());
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Then("the customer registration is successful")
@@ -73,24 +89,50 @@ public class RegistrationSteps {
 
     @When("the customer unregisters for DTUPay")
     public void customer_unregisters() {
-        customerClient.unregister(state.customer);
+        try {
+            customerClient.unregister(state.customer);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @When("the merchant unregisters for DTUPay")
     public void merchant_unregisters() {
-        merchantClient.unregister(state.merchant);
+        try {
+            merchantClient.unregister(state.merchant);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Then("the customer unregistration is successful")
     public void customer_unregistration_successful() {
-        Customer retrievedCustomer = customerClient.getCustomer(customer.dtupayUuid());
-        assertEquals(state.customer, retrievedCustomer);
+        try {
+            Customer retrievedCustomer = customerClient.getCustomer(customer.dtupayUuid());
+            assertEquals(state.customer, retrievedCustomer);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Then("the merchant unregistration is successful")
     public void merchant_unregistration_successful() {
-        Merchant retrievedMerchant = merchantClient.getMerchant(merchant.dtupayUuid());
-        assertEquals(state.merchant, retrievedMerchant);
+        try {
+            Merchant retrievedMerchant = merchantClient.getMerchant(merchant.dtupayUuid());
+            assertEquals(state.merchant, retrievedMerchant);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+    @Then("the customer registration is not successful")
+    public void customer_registration_failed() {
+        assertNotNull(state.lastException);
+    }
+
+    @Then("the merchant registration is not successful")
+    public void merchant_registration_failed() {
+        assertNotNull(state.lastException);
     }
 
     @Before

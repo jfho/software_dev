@@ -18,7 +18,11 @@ public class TokenSteps {
 
     @When("the customer requests {string} tokens")
     public void customer_requests_tokens(String count) {
-        state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), Integer.parseInt(count));
+        try{
+            state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), Integer.parseInt(count));
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Then("the customer will recive a list of {string} different tokens")
@@ -29,7 +33,40 @@ public class TokenSteps {
 
     @Given("And the merchant has a token from the customer")
     public void merchant_has_token() {
-        state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), 1);
+        try{
+            state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), 1);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+    @Then("the token request is not successful")
+    public void token_request_failed() {
+        assertNotNull(state.lastException);
+    }
+
+    @Then("the customer gets a message to {string}")
+    public void customer_gets_message(String msg) {
+        assertNotNull(state.lastException);
+        assertTrue(state.lastException.getMessage().contains(msg));
+    }
+
+    @Given("the customer has a valid token")
+    public void the_customer_has_a_valid_token() {
+        try{
+            state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), 6);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+    @Given("the customer has {string} tokens")
+    public void the_customer_has_tokens(String string) {
+        try{
+            state.tokens = customerClient.getTokens(state.customer.dtupayUuid(), Integer.parseInt(string));
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Before

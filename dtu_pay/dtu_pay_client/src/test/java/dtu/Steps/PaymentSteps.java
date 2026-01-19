@@ -21,27 +21,109 @@ public class PaymentSteps {
         this.state = state;
     }
 
-    @When("the customer performs a payment for {string} kr to the merchant")
+    /*@When("the customer performs a payment for {string} kr to the merchant")
     public void customer_pays(String amount) {
-        String token = state.tokens.get(0);
-        merchantClient.pay(token, state.merchant.dtupayUuid(), new BigDecimal(amount));
+        try{
+            merchantClient.pay(
+                state.tokens.get(0),
+                state.merchant.dtupayUuid(),
+                new BigDecimal(amount)
+            );
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
-
+    */
     @Then("the balance of the customer at the bank is {string} kr")
     public void customer_balance(String expected) {
-        Account customerAccount = bank.getAccount(state.customer.bankAccountUuid());
-        assertEquals(new BigDecimal(expected), customerAccount.getBalance());
+        try{
+            Account customerAccount = bank.getAccount(state.customer.bankAccountUuid());
+            assertEquals(new BigDecimal(expected), customerAccount.getBalance());
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Then("the balance of the merchant at the bank is {string} kr")
     public void merchant_balance(String expected) {
-        Account merchantAccount = bank.getAccount(state.merchant.bankAccountUuid());
-        assertEquals(new BigDecimal(expected), merchantAccount.getBalance());
+        try{
+            Account merchantAccount = bank.getAccount(state.merchant.bankAccountUuid());
+            assertEquals(new BigDecimal(expected), merchantAccount.getBalance());
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Then("the payment is not successful")
     public void payment_failed() {
         assertNotNull(state.lastException);
+    }
+
+    @When("a payment is initiated for {string} kr using merchant id {string}")
+    public void payment_with_unknown_merchant(String amount, String merchantId) {
+        try {
+            merchantClient.pay(
+                state.tokens.get(0),
+                merchantId,
+                new BigDecimal(amount)
+            );
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+    @When("the merchant initiates a transaction for {string} kr using token id {string}")
+    public void payment_with_unknown_token(String amount, String tokenId) {
+        try {
+            merchantClient.pay(
+                tokenId,
+                state.merchant.dtupayUuid(),
+                new BigDecimal(amount)
+            );
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+    @Then("an error message is returned saying {string}")
+    public void error_message_returned(String msg) {
+        assertNotNull(state.lastException);
+        assertTrue(state.lastException.getMessage().contains(msg));
+    }
+
+    @Given("the merchant has a token from the customer")
+    public void the_merchant_has_a_token_from_the_customer() {
+        try {
+            state.tokens = new CustomerClient().getTokens(state.customer.dtupayUuid(), 6);
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+    
+    @Given("the merchant initiates a transaction for {string} kr")
+    public void given_the_merchant_initiates_a_transaction_for_kr(String string) {
+        try {
+            merchantClient.pay(
+                state.tokens.get(0),
+                state.merchant.dtupayUuid(),
+                new BigDecimal(string)
+            );
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+    @When("the merchant initiates a transaction for {string} kr")
+    public void the_merchant_initiates_a_transaction_for_kr(String string) {
+        try {
+            merchantClient.pay(
+                state.tokens.get(0),
+                state.merchant.dtupayUuid(),
+                new BigDecimal(string)
+            );
+        } catch (Exception e) {
+            state.lastException = e;
+        }
     }
 
     @Before

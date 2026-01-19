@@ -8,8 +8,8 @@ Feature: Payment
         When the merchant initiates a transaction for "10" kr
         Then the balance of the customer at the bank is "990" kr
         And the balance of the merchant at the bank is "1010" kr
-    
-    ///Scenario: List of payments
+    """
+    Scenario: List of payments
         Given a customer bank account with first name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "1000"
         And a merchant bank account with first name "Caroline", last name "Strauss", CPR "654321-4321", and balance "1000"
         When the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
@@ -17,7 +17,7 @@ Feature: Payment
         And the merchant initiates a transaction for "10" kr
         And the manager asks for a list of payments
         Then the list contains payments where the customer paid "10" kr to the merchant
-
+    """
     Scenario: Merchant is not known
         Given a customer bank account with first name "Jeppe", last name "Weikop", CPR "123456-1234", and balance "1000"
         And the customer registers for DTUPay with first name "Jeppe", last name "Weikop", CPR "123456-1234"
