@@ -1,11 +1,14 @@
 package dtu;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import dtu.messagingUtils.Event;
 import dtu.models.Transaction;
@@ -23,13 +26,25 @@ public class PaymentServiceSteps {
     private String customerId;
     private String merchantId;
     private Transaction transaction;
+    private String correlationId;
+
+    // --- Topic Constants (Matched to Service) ---
+    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
+    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
+
+    private final String TOKEN_CUSTOMERID_REQ_RK = "payments.customerid.request";
+    private final String TOKEN_CUSTOMERID_RES_RK = "tokens.customerid.response";
+
+    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
+    private final String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
+    private final String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
+    private final String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
 
     public PaymentServiceSteps() {
-        handleEvent("payments.customerid.request");
-        handleEvent("payments.customerbankaccount.request");
-        handleEvent("payments.merchantbankaccount.request");
-        handleEvent("payments.transaction.report");
-        handleEvent("payments.transaction.status");
+        handleEvent(TOKEN_CUSTOMERID_REQ_RK);
+        handleEvent(BANKACCOUNT_CUSTOMER_REQ_RK);
+        handleEvent(BANKACCOUNT_MERCHANT_REQ_RK);
+        handleEvent(PAYMENTS_REGISTER_RES_RK);
     }
 
     private void handleEvent(String topic) {
@@ -39,10 +54,9 @@ public class PaymentServiceSteps {
     @Given("a customer with id {string}")
     public void a_customer_with_id(String customerId) {
         this.customerId = customerId;
-
-        mq.addHandler("payments.customerid.request", event -> {
+        mq.addHandler(TOKEN_CUSTOMERID_REQ_RK, event -> {
             String correlationId = event.getArgument(1, String.class);
-            mq.publish(new Event("tokens.customerid.response", new Object[] { customerId, correlationId }));
+            mq.publish(new Event(TOKEN_CUSTOMERID_RES_RK, new Object[] { customerId, correlationId }));
         });
     }
 
@@ -53,37 +67,34 @@ public class PaymentServiceSteps {
 
     @Given("a transaction with token {string} and amount {string} kr")
     public void a_transaction_with_token_and_amount_kr(String tokenId, String amount) {
-        transaction = new Transaction(tokenId, merchantId, new BigDecimal(amount), null, null);
+        transaction = new Transaction(tokenId, merchantId, new BigDecimal(amount), null);
     }
 
     @Given("a customer bank account with id {string}")
     public void a_customer_bank_account_with_id(String customerBankId) {
-        mq.addHandler("payments.customerbankaccount.request", event -> {
+        mq.addHandler(BANKACCOUNT_CUSTOMER_REQ_RK, event -> {
             String correlationId = event.getArgument(1, String.class);
-            mq.publish(
-                    new Event("accounts.customerbankaccount.response", new Object[] { customerBankId, correlationId }));
+            mq.publish(new Event(BANKACCOUNT_CUSTOMER_RES_RK, new Object[] { customerBankId, correlationId }));
         });
     }
 
     @Given("a merchant bank account with id {string}")
     public void a_merchant_bank_account_with_id(String merchantBankId) {
-        mq.addHandler("payments.merchantbankaccount.request", event -> {
+        mq.addHandler(BANKACCOUNT_MERCHANT_REQ_RK, event -> {
             String correlationId = event.getArgument(1, String.class);
-            mq.publish(
-                    new Event("accounts.merchantbankaccount.response", new Object[] { merchantBankId, correlationId }));
+            mq.publish(new Event(BANKACCOUNT_MERCHANT_RES_RK, new Object[] { merchantBankId, correlationId }));
         });
     }
 
     @When("the payment is registered by the payment service")
     public void the_payment_is_registered_by_the_payment_service() throws Exception {
-        paymentService.registerTransaction(transaction);
+        correlationId = UUID.randomUUID().toString();
+        mq.publish(new Event(PAYMENTS_REGISTER_REQ_RK, new Object[] { transaction, correlationId }));
     }
 
     @Then("the token service is asked for the customer id")
     public void the_token_service_is_asked_for_the_customer_id() {
-        Event event = publishedEvents.get("payments.customerid.request");
-
-        assertTrue(event != null);
+        Event event = publishedEvents.get(TOKEN_CUSTOMERID_REQ_RK);
 
         String actualToken = event.getArgument(0, String.class);
         assertEquals(transaction.tokenId(), actualToken);
@@ -91,34 +102,27 @@ public class PaymentServiceSteps {
 
     @Then("the account service is asked for the customer bank account")
     public void the_account_service_is_asked_for_the_customer_bank_account() {
-        Event event = publishedEvents.get("payments.customerbankaccount.request");
+        Event event = publishedEvents.get(BANKACCOUNT_CUSTOMER_REQ_RK);
 
-        assertTrue(event != null);
         assertEquals(customerId, event.getArgument(0, String.class));
     }
 
     @Then("the account service is asked for the merchant bank account")
     public void the_account_service_is_asked_for_the_merchant_bank_account() {
-        Event event = publishedEvents.get("payments.merchantbankaccount.request");
-        assertTrue(event != null);
+        Event event = publishedEvents.get(BANKACCOUNT_MERCHANT_REQ_RK);
+
         assertEquals(merchantId, event.getArgument(0, String.class));
     }
 
     @Then("the reporting service receives the transaction")
     public void the_reporting_service_receives_the_transaction() {
-        Event event = publishedEvents.get("payments.transaction.report");
-        assertTrue(event != null);
+        Event event = publishedEvents.get(PAYMENTS_REGISTER_RES_RK);
 
-        assertEquals(customerId, event.getArgument(0, String.class));
-        assertEquals(merchantId, event.getArgument(1, String.class));
-        assertEquals(transaction.amount().toString(), event.getArgument(2, String.class));
+        Transaction result = event.getArgument(0, Transaction.class);
 
-    }
-
-    @Then("the reporting service receives a successful transaction status")
-    public void the_reporting_service_receives_a_successful_transaction_status() {
-        Event event = publishedEvents.get("payments.transaction.status");
-        assertTrue(event != null);
-        assertEquals("Bank transaction successful", event.getArgument(0, String.class));
+        assertEquals(transaction.tokenId(), result.tokenId());
+        assertEquals(transaction.merchantId(), result.merchantId());
+        assertEquals(transaction.amount(), result.amount());
+        assertEquals(customerId, result.customerId());
     }
 }

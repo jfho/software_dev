@@ -115,8 +115,10 @@ public class PaymentService {
 
         if (transferSuccessful) {
             LOG.info("Transaction complete. Emitting report.");
+            Transaction resultTransaction = new Transaction(transaction.tokenId(), transaction.merchantId(),
+                    transaction.amount(), customerId);
             mq.publish(new Event(PAYMENTS_REGISTER_RES_RK,
-                    new Object[] { transaction, correlationId }));
+                    new Object[] { resultTransaction, correlationId }));
         } else {
             LOG.warn("Transaction failed at bank level.");
             mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { null, correlationId }));

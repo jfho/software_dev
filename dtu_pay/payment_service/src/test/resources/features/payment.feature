@@ -10,4 +10,4 @@ Feature: Payment
         And the account service is asked for the customer bank account
         And the account service is asked for the merchant bank account
         And the reporting service receives the transaction
-        And the reporting service receives a successful transaction status
+        
