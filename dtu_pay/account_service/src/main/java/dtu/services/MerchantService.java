@@ -25,7 +25,6 @@ public class MerchantService {
 
     private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
     private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
-    private String DELETE_MERCHANT_RK = "accounts.merchant.deleted";
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 
@@ -59,14 +58,10 @@ public class MerchantService {
         // register merchant handler (facade)
         queue.addHandler(REGISTER_MERCHANT_REQ_RK, e -> {
             LOG.info("received merchant registration request");
-            String firstName = e.getArgument(0, String.class);
-            String lastName = e.getArgument(1, String.class);
-            String cpr = e.getArgument(2, String.class);
-            String bankUuid = e.getArgument(3, String.class);
-            String corrId = e.getArgument(4, String.class);
-            LOG.info("firstName: " + firstName + ", lastName: " + lastName);
+            Merchant merchantToRegister = e.getArgument(0, Merchant.class);
+            String corrId = e.getArgument(1, String.class);
 
-            Merchant newMerchant = registerMerchant(new Merchant(firstName, lastName, cpr, bankUuid, null));
+            Merchant newMerchant = registerMerchant(merchantToRegister);
 
             queue.publish(new Event(REGISTER_MERCHANT_RES_RK, new Object[] { newMerchant, corrId } ));
 		});
