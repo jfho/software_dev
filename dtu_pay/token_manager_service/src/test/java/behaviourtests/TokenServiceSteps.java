@@ -126,7 +126,7 @@ public class TokenServiceSteps {
         });
 
         correlationId = "string";
-        mq.publish(new Event(createTokensRequest, new Object[] {customerId, correlationId} ));
+        mq.publish(new Event(createTokensRequest, new Object[] {customerId, 6, correlationId} ));
     }
 
     @Then("a tokens response includes the list of tokens")

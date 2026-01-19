@@ -41,9 +41,10 @@ public class TokenService {
     public void policyCreateTokens(Event event) {
         LOG.info("Creating tokens");
         String customerId = event.getArgument(0, String.class);
-        String corrId = event.getArgument(1, String.class);
+        int amount = event.getArgument(1, Integer.class);
+        String corrId = event.getArgument(2, String.class);
         
-        List<String> tokenList = createTokens(customerId, 6);
+        List<String> tokenList = createTokens(customerId, amount);
 
         LOG.info("publishing token list");
         queue.publish(new Event(createTokensResponse, new Object[] {tokenList, corrId} )); 
