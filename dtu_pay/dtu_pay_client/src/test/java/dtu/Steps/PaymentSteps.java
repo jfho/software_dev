@@ -106,6 +106,21 @@ public class PaymentSteps {
         }
     }
 
+    @When("the merchant initiates a transaction for {string} kr using token id {string}")
+    public void the_merchant_initiates_a_transaction_for_kr_using_token_id(String string, String string2) {
+        try {
+            
+            merchantClient.pay(
+                string2,
+                state.merchant.dtupayUuid(),
+                new BigDecimal(string)
+            );
+        } catch (Exception e) {
+            state.lastException = e;
+        }
+    }
+
+
     @Before
     public void setup() {
         state.tokens = null;
