@@ -28,13 +28,13 @@ public class CustomerService {
     private final String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
     private final String CUSTOMER_REPORT_RES_RK = "reports.customerreport.response";
     private final String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
-    private final String TOKENS_REGISTER_RES_RK = "tokens.createtokens.response";
+    private final String TOKENS_REGISTER_RES_RK = "TokensGenerated";
 
     private final String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
     private final String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
     private final String CUSTOMER_REPORT_REQ_RK = "facade.customerreport.request";
     private final String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
-    private final String TOKENS_REGISTER_REQ_RK = "facade.createtokens.request";
+    private final String TOKENS_REGISTER_REQ_RK = "TokensRequested";
 
     public CustomerService(MessageQueue mq) {
         this.mq = mq;

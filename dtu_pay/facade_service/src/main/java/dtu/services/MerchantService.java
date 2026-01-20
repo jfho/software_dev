@@ -37,7 +37,7 @@ public class MerchantService {
     private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
     private final String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
 
-    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
+    private final String PAYMENTS_REGISTER_REQ_RK = "PaymentRequested";
     private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
 
     public MerchantService(MessageQueue mq) {
