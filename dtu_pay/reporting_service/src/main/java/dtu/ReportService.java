@@ -1,5 +1,6 @@
 package dtu;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,7 +9,9 @@ import org.jboss.logging.Logger;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Database;
+import dtu.models.MerchantTransaction;
 import dtu.models.RecordedPayment;
+import dtu.util.PaymentConverterMerchant;
 
 public class ReportService {
     MessageQueue queue;
@@ -89,8 +92,9 @@ public class ReportService {
         return payments.stream().filter(p -> p.customerId().equals(customerId)).toList();
     }
 
-    public List<RecordedPayment> getTransactionsForMerchant(String merchantId) {
+    public List<MerchantTransaction> getTransactionsForMerchant(String merchantId) {
         List<RecordedPayment> payments = db.listPayments();
-        return payments.stream().filter(p -> p.merchantId().equals(merchantId)).toList();
+        List<MerchantTransaction> merchantTransactions = PaymentConverterMerchant.toMerchantTransactions(payments);
+        return merchantTransactions.stream().filter(p -> p.merchantId().equals(merchantId)).toList();
     }
 }

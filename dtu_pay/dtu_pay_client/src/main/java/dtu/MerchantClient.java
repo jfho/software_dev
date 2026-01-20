@@ -18,8 +18,8 @@ public class MerchantClient extends BaseClient {
 
     public Merchant register(Merchant merchant) {
         Response res = r.path(MERCHANTS_PATH)
-                        .request()
-                        .post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
+                .request()
+                .post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
 
         if (res.getStatus() >= 400) {
             throw new RuntimeException(res.readEntity(String.class));
@@ -28,45 +28,49 @@ public class MerchantClient extends BaseClient {
     }
 
     public Response unregister(Merchant merchant) {
-        return r.path(MERCHANTS_PATH )
-                    .path(String.valueOf(merchant.dtupayUuid()))
-                    .request()
-                    .delete();
+        return r.path(MERCHANTS_PATH)
+                .path(String.valueOf(merchant.dtupayUuid()))
+                .request()
+                .delete();
     }
 
     public Merchant getMerchant(String merchantDtupayUuid) {
         Response res = r.path(MERCHANTS_PATH)
-                    .path(merchantDtupayUuid)
-                    .request()
-                    .get();
-        
+                .path(merchantDtupayUuid)
+                .request()
+                .get();
+
+        if (res.getStatus() == 404) {
+            return null;
+        }
+
         if (res.getStatus() >= 400) {
             throw new RuntimeException(res.readEntity(String.class));
         }
         return res.readEntity(Merchant.class);
     }
 
-    public boolean pay(String tokenUuid, String merchantDtupayUuid, String amount) {
+    public void pay(String tokenUuid, String merchantDtupayUuid, String amount) {
         MerchantTransaction transaction = new MerchantTransaction(tokenUuid, merchantDtupayUuid, amount);
         Response res = r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/payments")
-                        .request()
-                        .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
-        
+                .request()
+                .post(Entity.entity(transaction, MediaType.APPLICATION_JSON));
+
         if (res.getStatus() >= 400) {
             throw new RuntimeException(res.readEntity(String.class));
         }
-        return res.readEntity(Boolean.class);
     }
 
     public List<Transaction> getReports(String merchantDtupayUuid) {
         Response res = r.path(MERCHANTS_PATH + "/" + merchantDtupayUuid + "/reports")
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .get();
-        
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .get();
+
         if (res.getStatus() >= 400) {
             throw new RuntimeException(res.readEntity(String.class));
         }
-        return res.readEntity(new GenericType<List<Transaction>>(){}); 
+        return res.readEntity(new GenericType<List<Transaction>>() {
+        });
     }
 }

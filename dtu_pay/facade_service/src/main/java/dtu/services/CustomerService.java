@@ -9,10 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
-import dtu.models.CustomerTransaction;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import dtu.models.Transaction;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
@@ -72,14 +69,6 @@ public class CustomerService {
         Customer result = resultEvent.getArgument(0, Customer.class);
         LOG.info("Customer registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
 
-        if (result == null) {
-            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
-                .entity("customer registration failed")
-                .type(MediaType.TEXT_PLAIN)
-                .build()
-            );
-        }
-
         return result;
     }
 
@@ -98,7 +87,7 @@ public class CustomerService {
         return resultEvent.getArgument(0, Customer.class);
     }
 
-    public List<CustomerTransaction> getTransactionsForCustomer(String customerId) {
+    public List<Transaction> getTransactionsForCustomer(String customerId) {
         LOG.info("Requesting transaction report for customer ID: " + customerId);
 
         String correlationId = UUID.randomUUID().toString();
@@ -109,7 +98,7 @@ public class CustomerService {
 
         Event resultEvent = future.join();
 
-        CustomerTransaction[] array = resultEvent.getArgument(0, CustomerTransaction[].class);
+        Transaction[] array = resultEvent.getArgument(0, Transaction[].class);
         LOG.info("Report received for customer ID: " + customerId + ". Transactions found: "
                 + (array != null ? array.length : 0));
 
@@ -118,13 +107,13 @@ public class CustomerService {
 
     public boolean deleteCustomer(String customerId) {
         LOG.info("Requesting deletion for customer ID: " + customerId);
-        
+
         String correlationId = UUID.randomUUID().toString();
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
         mq.publish(new Event(DELETE_CUSTOMER_REQ_RK, new Object[] { customerId, correlationId }));
-        
+
         Event resultEvent = future.join();
         boolean success = resultEvent.getArgument(0, Boolean.class);
         LOG.info("received: success = " + true);
@@ -145,14 +134,6 @@ public class CustomerService {
 
         String[] tokens = resultEvent.getArgument(0, String[].class);
         LOG.info("Tokens generated successfully. Count: " + (tokens != null ? tokens.length : 0));
-
-        if (tokens.length == 0) {
-            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
-                .entity("invalid token request")
-                .type(MediaType.TEXT_PLAIN)
-                .build()
-            );
-        }
 
         return Arrays.asList(tokens);
     }

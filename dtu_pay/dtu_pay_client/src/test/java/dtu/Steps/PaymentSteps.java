@@ -20,7 +20,7 @@ public class PaymentSteps {
     private final MerchantClient merchantClient = new MerchantClient();
 
     boolean paymentSuccessful = false;
-    
+
     public PaymentSteps(State state) {
         this.state = state;
     }
@@ -28,7 +28,7 @@ public class PaymentSteps {
     @Before("@payment")
     public void setup() {
         paymentSuccessful = false;
-        
+
         state.tokens = null;
         state.transactions = null;
         state.lastException = null;
@@ -44,7 +44,7 @@ public class PaymentSteps {
             merchantClient.unregister(state.merchant);
             bank.unregister(state.merchant.bankAccountUuid());
         }
-    }    
+    }
 
     @Given("the merchant has a token from the customer")
     public void merchantHasAToken() {
@@ -54,11 +54,11 @@ public class PaymentSteps {
     @When("the merchant initiates a transaction for {string} kr")
     public void merchantInitiatesTransaction(String amount) {
         try {
-            paymentSuccessful = merchantClient.pay(
-                state.tokens.get(0),
-                state.merchant.dtupayUuid(),
-                amount
-            );
+            merchantClient.pay(
+                    state.tokens.get(0),
+                    state.merchant.dtupayUuid(),
+                    amount);
+            paymentSuccessful = true;
         } catch (Exception e) {
             paymentSuccessful = false;
             state.lastException = e;
@@ -68,11 +68,11 @@ public class PaymentSteps {
     @When("the merchant initiates a transaction for {string} kr using token id {string}")
     public void merchantInitiatesTransactionWithToken(String amount, String tokenId) {
         try {
-            paymentSuccessful = merchantClient.pay(
-                tokenId,
-                state.merchant.dtupayUuid(),
-                amount
-            );
+            merchantClient.pay(
+                    tokenId,
+                    state.merchant.dtupayUuid(),
+                    amount);
+            paymentSuccessful = true;
         } catch (Exception e) {
             paymentSuccessful = false;
             state.lastException = e;
@@ -82,11 +82,10 @@ public class PaymentSteps {
     @When("a payment is initiated for {string} kr using merchant id {string}")
     public void paymentWithUnknownMerchant(String amount, String merchantId) {
         try {
-            paymentSuccessful = merchantClient.pay(
-                state.tokens.get(0),
-                merchantId,
-                amount
-            );
+            merchantClient.pay(
+                    state.tokens.get(0),
+                    merchantId,
+                    amount);
 
         } catch (Exception e) {
             paymentSuccessful = false;
