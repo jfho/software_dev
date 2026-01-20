@@ -36,7 +36,7 @@ public class RegistrationSteps {
     public void setup() {
         customerUuid = null;
         merchantUuid = null;
-        
+
         state.tokens = null;
         state.transactions = null;
         state.lastException = null;
@@ -142,6 +142,6 @@ public class RegistrationSteps {
     @Then("an error message is returned saying {string}")
     public void errorMessageReturned(String msg) {
         assertNotNull(state.lastException);
-        assertTrue(state.lastException.getMessage().contains(msg));
+        assertEquals(msg, state.lastException.getMessage());
     }
 }
