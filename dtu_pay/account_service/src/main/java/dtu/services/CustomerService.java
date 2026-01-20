@@ -49,6 +49,7 @@ public class CustomerService {
             LOG.info("received customer registration request");
             Customer customerToRegister = e.getArgument(0, Customer.class);
             String corrId = e.getArgument(1, String.class);
+            LOG.info("Registering customer " + customerToRegister);
 
             Customer newCustomer = registerCustomer(customerToRegister);
 
