@@ -24,10 +24,10 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String createTokensRequest = "facade.createtokens.request";
-    private String createTokensResponse = "tokens.createtokens.response";
-    private String customerIdRequest = "payments.customerid.request";
-    private String customerIdResponse = "tokens.customerid.response";
+    private String createTokensRequest = "PaymentRequested";
+    private String createTokensResponse = "TokenValidated";
+    private String customerIdRequest = "TokensRequested";
+    private String customerIdResponse = "TokensGenerated";
 
     private static final Logger LOG = Logger.getLogger(TokenService.class);
 
