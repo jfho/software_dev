@@ -14,7 +14,9 @@ public class CustomerService {
     private final Database db = Database.getInstance();
     MessageQueue queue;
 
-    
+    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "TokenValidated";
+    private final String BANKACCOUNT_CUSTOMER_RES_RK = "CustomerBankAccountRetrieved";
+
     private String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
     private String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
     private String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
@@ -23,9 +25,7 @@ public class CustomerService {
     private String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
     private String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
 
-    private String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
-
+    
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
 
     public CustomerService(MessageQueue q) {

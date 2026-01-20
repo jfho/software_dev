@@ -14,7 +14,7 @@ public class ReportService {
     MessageQueue queue;
     Database db = Database.getInstance();
 
-    private String TRANSACTION_COMPLETED_RK = "payments.transaction.response";
+    private String TRANSACTION_COMPLETED_RK = "MoneyTransferFinished";
     private String MERCHANT_GETTRANSACTIONS_REQ = "facade.merchantreport.request";
     private String CUSTOMER_GETTRANSACTIONS_REQ = "facade.customerreport.request";
     private String MANAGER_GETTRANSACTIONS_REQ = "facade.managerreport.request";

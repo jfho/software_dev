@@ -23,8 +23,8 @@ public class MerchantService {
     private String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
     private String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
 
-    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
-    private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
+    private String BANKACCOUNT_MERCHANT_REQ_RK = "PaymentRequested";
+    private String BANKACCOUNT_MERCHANT_RES_RK = "MerchantBankAccountRetrieved";
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 

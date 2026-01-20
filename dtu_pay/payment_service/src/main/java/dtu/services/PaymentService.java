@@ -24,10 +24,8 @@ public class PaymentService {
     private final String PAYMENTS_REGISTER_REQ_RK = "PaymentRequested";
     private final String PAYMENTS_REGISTER_RES_RK = "MoneyTransferFinished";
 
-    private final String TOKEN_CUSTOMERID_RES_RK = "CustomerBankAccountRetrieved";
-
-    private final String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
-    private final String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
+    private final String BANKACCOUNT_CUSTOMER_RES_RK = "CustomerBankAccountRetrieved";
+    private final String BANKACCOUNT_MERCHANT_RES_RK = "MerchantBankAccountRetrieved";
 
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
