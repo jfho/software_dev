@@ -75,8 +75,10 @@ public class PaymentService {
         String customerId = future.join();
 
         if (customerId == null || customerId.isEmpty()) {
-            throw new Exception("Invalid token: Customer ID could not be retrieved.");
+            //throw new Exception("Invalid token: Customer ID could not be retrieved.");
+            return null;
         }
+        
         return customerId;
     }
 
@@ -90,8 +92,10 @@ public class PaymentService {
         String bankAccountId = future.join();
 
         if (bankAccountId == null || bankAccountId.isEmpty()) {
-            throw new Exception("Bank Account ID not found for ID: " + dtuPayId);
+            //throw new Exception("Bank Account ID not found for ID: " + dtuPayId);
+            return null;
         }
+
         return bankAccountId;
     }
 
@@ -109,8 +113,10 @@ public class PaymentService {
         LOG.info("Resolved Merchant Bank Account: " + merchantBankAccountId);
 
         LOG.info("Step 4: Executing bank transfer...");
-        boolean transferSuccessful = bankClient.transfer(customerBankAccountId, merchantBankAccountId,
-                transaction.amount());
+        boolean transferSuccessful = customerId != null 
+            && customerBankAccountId != null
+            && merchantBankAccountId != null
+            && bankClient.transfer(customerBankAccountId, merchantBankAccountId, transaction.amount());
         LOG.info("Transfer result: " + transferSuccessful);
 
         if (transferSuccessful) {

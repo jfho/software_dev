@@ -14,6 +14,9 @@ import dtu.messagingUtils.MessageQueue;
 import dtu.models.Merchant;
 import dtu.models.MerchantTransaction;
 import dtu.models.Transaction;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public class MerchantService {
     MessageQueue mq;
@@ -29,9 +32,10 @@ public class MerchantService {
     private final String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
 
     private final String MERCHANT_REPORT_REQ_RK = "facade.merchantreport.request";
-    private final String MERCHANT_REPORT_RES_RK = "reports.merchant.response";
+    private final String MERCHANT_REPORT_RES_RK = "reports.merchantreport.response";
 
     private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
+    private final String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
 
     private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
     private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
@@ -40,6 +44,7 @@ public class MerchantService {
         this.mq = mq;
         this.mq.addHandler(REGISTER_MERCHANT_RES_RK, this::handleResponse);
         this.mq.addHandler(GET_MERCHANT_RES_RK, this::handleResponse);
+        this.mq.addHandler(DELETE_MERCHANT_RES_RK, this::handleResponse);
         this.mq.addHandler(MERCHANT_REPORT_RES_RK, this::handleResponse);
         this.mq.addHandler(PAYMENTS_REGISTER_RES_RK, this::handleResponse);
     }
@@ -68,8 +73,15 @@ public class MerchantService {
 
         Event resultEvent = future.join();
         Merchant result = resultEvent.getArgument(0, Merchant.class);
-
         LOG.info("Merchant registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
+
+        if (result == null) {
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("merchant registration failed")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
+        }
 
         return result;
     }
@@ -108,9 +120,20 @@ public class MerchantService {
         return Arrays.asList(array);
     }
 
-    public void deleteMerchant(String merchantId) {
+    public boolean deleteMerchant(String merchantId) {
         LOG.info("Requesting deletion for merchant ID: " + merchantId);
-        mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId }));
+
+        String correlationId = UUID.randomUUID().toString();
+        CompletableFuture<Event> future = new CompletableFuture<>();
+        pendingRequests.put(correlationId, future);
+
+        mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId, correlationId }));
+
+        Event resultEvent = future.join();
+        boolean success = resultEvent.getArgument(0, Boolean.class);
+        LOG.info("received: success = " + true);
+
+        return success;
     }
 
     public boolean registerTransaction(MerchantTransaction transaction) {
@@ -126,7 +149,11 @@ public class MerchantService {
         Transaction resultTransaction = resultEvent.getArgument(0, Transaction.class);
         if (resultTransaction == null) {
             LOG.warn("Transaction failed!");
-            return false;
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("transaction failed")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
         } else {
             LOG.info("Transaction succeeded!");
             return true;

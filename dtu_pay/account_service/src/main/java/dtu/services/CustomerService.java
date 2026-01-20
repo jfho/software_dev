@@ -74,7 +74,7 @@ public class CustomerService {
             LOG.info("customerId: " + customerId + ", corrId: " + corrId);
 
             String bankAccountId = null;
-            if (db.hasCustomer(customerId)) {
+            if (customerId != null && db.hasCustomer(customerId)) {
                 bankAccountId = db.getCustomer(customerId).bankAccountUuid();
             }
 
@@ -87,6 +87,10 @@ public class CustomerService {
     }
 
     public Customer registerCustomer(Customer customer) {
+        if (db.hasCustomerWithCpr(customer.cpr())) {
+            return null;
+        }
+        
         String dtupayUuid = UUID.randomUUID().toString();
         Customer registeredCustomer = new Customer(customer.firstName(), customer.lastName(), customer.cpr(), customer.bankAccountUuid(), dtupayUuid);
         db.addCustomer(registeredCustomer);

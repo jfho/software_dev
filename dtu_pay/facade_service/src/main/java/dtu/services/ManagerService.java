@@ -22,7 +22,7 @@ public class ManagerService {
 
     public ManagerService(MessageQueue mq) {
         this.mq = mq;
-        this.mq.addHandler("reports.manager.response", this::handleResponse);
+        this.mq.addHandler("reports.managerreport.response", this::handleResponse);
     }
 
     public void handleResponse(Event event) {
@@ -42,7 +42,7 @@ public class ManagerService {
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.manager.request", new Object[] { correlationId }));
+        mq.publish(new Event("facade.managerreport.request", new Object[] { correlationId }));
 
         Event resultEvent = future.join();
 
