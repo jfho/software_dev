@@ -84,7 +84,7 @@ public class ReportingServiceSteps {
 
     @When("a payment event with amount {string} is received from ID {string} to {string}")
     public void paymentEventReceived(String amount, String customerId, String merchantId) {
-        RecordedPayment payment = new RecordedPayment(customerId, merchantId, amount, null, null);
+        RecordedPayment payment = new RecordedPayment(customerId, merchantId, amount, null, null, null);
         Event event = new Event(TRANSACTION_COMPLETED_RK, new Object[] { payment, null });
         mq.publish(event);
     }

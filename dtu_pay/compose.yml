@@ -16,21 +16,23 @@ services:
       retries: 5
       start_period: 20s
 
-  token_manager_service:
-    build: ./token_manager_service
-    image: token_manager_service
-    container_name: token_manager_service
-    networks:
-      - dtupay_internal
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-
   facade_service:
     build: ./facade_service
     image: facade_service
     ports:
       - "8080:8080"
+    networks:
+      - dtupay_internal
+    depends_on:
+      - payment_service
+      - account_service
+      - reporting_service
+      - token_manager_service
+
+  token_manager_service:
+    build: ./token_manager_service
+    image: token_manager_service
+    container_name: token_manager_service
     networks:
       - dtupay_internal
     depends_on:

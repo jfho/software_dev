@@ -37,7 +37,7 @@ public class ReportService {
             String corrId = e.getArgument(1, String.class);
             LOG.info("merchantId: " + merchantId);
 
-            List<RecordedPayment> transactionList = getTransactionsForMerchant(merchantId);
+            List<MerchantTransaction> transactionList = getTransactionsForMerchant(merchantId);
             queue.publish(new Event(MERCHANT_GETTRANSACTIONS_RES, new Object[] { transactionList, corrId }));
 
         });
@@ -71,10 +71,11 @@ public class ReportService {
                 LOG.info("Ignoring failed transaction");
                 return;
             }
+            String timestamp = Instant.now().toString();
 
             String transactionId = UUID.randomUUID().toString();
             RecordedPayment payment = new RecordedPayment(receivedPayment.customerId(), receivedPayment.merchantId(),
-                    receivedPayment.amount(), receivedPayment.tokenId(), transactionId);
+                    receivedPayment.amount(), receivedPayment.tokenId(), transactionId, timestamp);
 
             LOG.info("customerId: " + payment.customerId() + ", merchantId: " + payment.merchantId() + ", amount: "
                     + payment.amount());
