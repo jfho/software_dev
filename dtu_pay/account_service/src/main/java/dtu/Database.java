@@ -33,6 +33,10 @@ public class Database {
         return customers.containsKey(id);
     }
 
+    public boolean hasCustomerWithCpr(String cpr) {
+        return customers.values().stream().anyMatch(c -> c.cpr().equals(cpr));
+    }
+
     public List<Customer> listCustomers() {
         return List.copyOf(customers.values());
     }
@@ -56,6 +60,10 @@ public class Database {
 
     public boolean hasMerchant(String id) {
         return merchants.containsKey(id);
+    }
+
+    public boolean hasMerchantWithCpr(String cpr) {
+        return merchants.values().stream().anyMatch(m -> m.cpr().equals(cpr));
     }
 
     public List<Merchant> listMerchants() {

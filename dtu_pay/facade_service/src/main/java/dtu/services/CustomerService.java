@@ -10,6 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.jboss.logging.Logger;
 
 import dtu.models.CustomerTransaction;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
@@ -68,6 +71,14 @@ public class CustomerService {
 
         Customer result = resultEvent.getArgument(0, Customer.class);
         LOG.info("Customer registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
+
+        if (result == null) {
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("customer registration failed")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
+        }
 
         return result;
     }
@@ -134,6 +145,14 @@ public class CustomerService {
 
         String[] tokens = resultEvent.getArgument(0, String[].class);
         LOG.info("Tokens generated successfully. Count: " + (tokens != null ? tokens.length : 0));
+
+        if (tokens.length == 0) {
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("invalid token request")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
+        }
 
         return Arrays.asList(tokens);
     }

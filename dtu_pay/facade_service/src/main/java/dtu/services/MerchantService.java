@@ -14,6 +14,9 @@ import dtu.messagingUtils.MessageQueue;
 import dtu.models.Merchant;
 import dtu.models.MerchantTransaction;
 import dtu.models.Transaction;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public class MerchantService {
     MessageQueue mq;
@@ -70,8 +73,15 @@ public class MerchantService {
 
         Event resultEvent = future.join();
         Merchant result = resultEvent.getArgument(0, Merchant.class);
-
         LOG.info("Merchant registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
+
+        if (result == null) {
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("merchant registration failed")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
+        }
 
         return result;
     }
@@ -139,7 +149,11 @@ public class MerchantService {
         Transaction resultTransaction = resultEvent.getArgument(0, Transaction.class);
         if (resultTransaction == null) {
             LOG.warn("Transaction failed!");
-            return false;
+            throw new BadRequestException(Response.status(Response.Status.BAD_REQUEST)
+                .entity("transaction failed")
+                .type(MediaType.TEXT_PLAIN)
+                .build()
+            );
         } else {
             LOG.info("Transaction succeeded!");
             return true;

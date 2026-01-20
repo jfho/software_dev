@@ -73,22 +73,25 @@ public class TokenService {
     public List<String> createTokens(String customerID, int amount) {
         // return existing if present or too large
         List<String> existing = tokenMap.get(customerID);
+        
         if (existing != null && existing.size() > 1) {
-            return existing;
+            return Collections.emptyList();
+        }
+
+        if (amount > 5 || amount <= 0) {
+            return Collections.emptyList();
         }
 
         // initialize a thread-safe list
         List<String> generatedTokens = new CopyOnWriteArrayList<>();
         
-        int amountOfTokensToGenerate = Integer.min(6, Integer.max(amount, 0)); // clamp token generation to the range 0..6. Should cahnge
-
-        for (int i = 0; i < amountOfTokensToGenerate; i++) {
+        for (int i = 0; i < amount; i++) {
             String t = createTokenID();
             generatedTokens.add(t);
             tokenToCustomer.put(t, customerID);
         }
 
-        tokenMap.put(customerID, generatedTokens);
+        tokenMap.computeIfAbsent(customerID, k -> new CopyOnWriteArrayList<>()).addAll(generatedTokens);
         return generatedTokens;
     }
 

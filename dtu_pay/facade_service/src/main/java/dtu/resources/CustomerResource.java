@@ -16,11 +16,12 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/customers")
+@Path("/_customer")
 public class CustomerResource {
     private static final CustomerService service = new CustomerService(new RabbitMqQueue());
 
     @POST
+    @Path("/customers")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Customer registerCustomer(Customer customer) {
@@ -28,27 +29,27 @@ public class CustomerResource {
     }
 
     @GET
-    @Path("/{customerId}")
+    @Path("/customers/{customerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Customer getCustomer(@PathParam("customerId") String customerId) {
         return service.getCustomer(customerId);
     }
 
     @DELETE
-    @Path("/{customerId}")
+    @Path("/customers/{customerId}")
     public void deleteCustomer(@PathParam("customerId") String customerId) {
         service.deleteCustomer(customerId);
     }
 
     @GET
-    @Path("/{customerId}/reports")
+    @Path("/customers/{customerId}/reports")
     @Produces(MediaType.APPLICATION_JSON)
     public List<CustomerTransaction> getReport(@PathParam("customerId") String customerId) {
         return service.getTransactionsForCustomer(customerId);
     }
 
     @POST
-    @Path("/{customerId}/tokens")
+    @Path("/customers/{customerId}/tokens")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> createTokens(@PathParam("customerId") String customerId, String amount) {
