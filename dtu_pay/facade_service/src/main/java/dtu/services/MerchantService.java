@@ -25,20 +25,20 @@ public class MerchantService {
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 
-    private final String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
-    private final String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
+    private final String REGISTER_MERCHANT_REQ_RK = "MerchantRegistrationRequested";
+    private final String REGISTER_MERCHANT_RES_RK = "MerchantRegistered";
 
-    private final String GET_MERCHANT_REQ_RK = "facade.getMerchant.request";
-    private final String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
+    private final String GET_MERCHANT_REQ_RK = "MerchantGetRequested";
+    private final String GET_MERCHANT_RES_RK = "MerchantFetched";
 
-    private final String MERCHANT_REPORT_REQ_RK = "facade.merchantreport.request";
-    private final String MERCHANT_REPORT_RES_RK = "reports.merchantreport.response";
+    private final String MERCHANT_REPORT_REQ_RK = "MerchantReportRequested";
+    private final String MERCHANT_REPORT_RES_RK = "MerchantReportFetched";
 
-    private final String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
-    private final String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
+    private final String DELETE_MERCHANT_REQ_RK = "MerchantDeletionRequested";
+    private final String DELETE_MERCHANT_RES_RK = "MerchantDeleted";
 
     private final String PAYMENTS_REGISTER_REQ_RK = "PaymentRequested";
-    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
+    private final String PAYMENTS_REGISTER_RES_RK = "MoneyTransferFinished";
 
     public MerchantService(MessageQueue mq) {
         this.mq = mq;

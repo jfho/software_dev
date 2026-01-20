@@ -15,13 +15,13 @@ public class MerchantService {
     private final Database db = Database.getInstance();
     MessageQueue queue;
 
-    private String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
-    private String GET_MERCHANT_REQ_RK = "facade.getMerchant.request";
-    private String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
+    private String REGISTER_MERCHANT_REQ_RK = "MerchantRegistrationRequested";
+    private String GET_MERCHANT_REQ_RK = "MerchantGetRequested";
+    private String DELETE_MERCHANT_REQ_RK = "MerchantDeletionRequested";
 
-    private String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
-    private String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
-    private String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
+    private String REGISTER_MERCHANT_RES_RK = "MerchantRegistered";
+    private String GET_MERCHANT_RES_RK = "MerchantFetched";
+    private String DELETE_MERCHANT_RES_RK = "MerchantDeleted";
 
     private String BANKACCOUNT_MERCHANT_REQ_RK = "PaymentRequested";
     private String BANKACCOUNT_MERCHANT_RES_RK = "MerchantBankAccountRetrieved";

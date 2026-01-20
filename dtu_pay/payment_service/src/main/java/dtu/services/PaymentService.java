@@ -37,30 +37,29 @@ public class PaymentService {
     }
 
     public void handlePayment(Event event) {
-        
-        Transaction transaction = event.getArgument(0, Transaction.class);
+        Transaction receivedTransaction = event.getArgument(0, Transaction.class);
         String correlationId = event.getArgument(1, String.class);
-        
-        PendingTransaction transaction2 = new PendingTransaction();
-        transaction2.amount = transaction.amount();
 
-        pendingTransactions.put(correlationId, transaction2);
+        PendingTransaction transaction = new PendingTransaction();
+        transaction.amount = receivedTransaction.amount();
+
+        pendingTransactions.put(correlationId, transaction);
     }
 
     public void handleCustomerBankRetreived(Event event) {
         String customerId = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
-        
+
         PendingTransaction update = pendingTransactions.get(correlationId);
         update.bankCusId = customerId;
         pendingTransactions.put(correlationId, update);
-        evaluatePending(correlationId);     
+        evaluatePending(correlationId);
     }
 
     public void handleMerchantBankRetreived(Event event) {
         String merchantId = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
-        
+
         PendingTransaction update = pendingTransactions.get(correlationId);
         update.bankMerId = merchantId;
         pendingTransactions.put(correlationId, update);
@@ -70,15 +69,12 @@ public class PaymentService {
     private void evaluatePending(String correlationId) {
         PendingTransaction transaction = pendingTransactions.get(correlationId);
         boolean transferSuccessful = false;
-        if (
-            transaction.bankCusId != null &&
-            transaction.bankMerId != null &&
-            transaction.amount != null
-        ) {
+        if (transaction.bankCusId != null &&
+                transaction.bankMerId != null &&
+                transaction.amount != null) {
             transferSuccessful = bankClient.transfer(transaction.bankCusId, transaction.bankMerId, transaction.amount);
             pendingTransactions.remove(correlationId);
         }
-
 
         if (transferSuccessful) {
             mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { true, correlationId }));

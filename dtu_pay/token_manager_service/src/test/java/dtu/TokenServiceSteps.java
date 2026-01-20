@@ -28,11 +28,10 @@ public class TokenServiceSteps {
     private MessageQueue mq = new MockQueue();
     private TokenService tc = new TokenService(mq);
 
-    private String customerIdResponse = "tokens.customerid.response";
-    private String createTokensResponse = "tokens.createtokens.response";
-
-    private String customerIdRequest = "payments.customerid.request";
-    private String createTokensRequest = "facade.createtokens.request";
+    private String createTokensRequest = "PaymentRequested";
+    private String createTokensResponse = "TokenValidated";
+    private String customerIdRequest = "TokensRequested";
+    private String customerIdResponse = "TokensGenerated";
     
     @After
     public void clearTheData() {

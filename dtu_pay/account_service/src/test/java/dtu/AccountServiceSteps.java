@@ -39,28 +39,28 @@ public class AccountServiceSteps {
     Event customerBankAccountResponse = null;
     Event merchantBankAccountResponse = null;
 
-    private String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
-    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
-    private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
+    private String BANKACCOUNT_CUSTOMER_REQ_RK = "TokenValidated";
+    private String BANKACCOUNT_CUSTOMER_RES_RK = "CustomerBankAccountRetrieved";
+    private String BANKACCOUNT_MERCHANT_REQ_RK = "PaymentRequested";
+    private String BANKACCOUNT_MERCHANT_RES_RK = "MerchantBankAccountRetrieved";
 
-    private String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
-    private String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
+    private String REGISTER_CUSTOMER_REQ_RK = "CustomerRegistrationRequested";
+    private String REGISTER_CUSTOMER_RES_RK = "CustomerRegistered";
 
-    private String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
-    private String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
+    private String GET_CUSTOMER_REQ_RK = "CustomerGetRequested";
+    private String GET_CUSTOMER_RES_RK = "CustomerFetched";
 
-    private String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
-    private String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
+    private String DELETE_CUSTOMER_REQ_RK = "CustomerDeletionRequested";
+    private String DELETE_CUSTOMER_RES_RK = "CustomerDeleted";
     
-    private String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
-    private String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
+    private String REGISTER_MERCHANT_REQ_RK = "MerchantRegistrationRequested";
+    private String REGISTER_MERCHANT_RES_RK = "MerchantRegistered";
 
-    private String GET_MERCHANT_REQ_RK = "facade.getMerchant.request";
-    private String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
+    private String GET_MERCHANT_REQ_RK = "MerchantGetRequested";
+    private String GET_MERCHANT_RES_RK = "MerchantFetched";
 
-    private String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
-    private String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
+    private String DELETE_MERCHANT_REQ_RK = "MerchantDeletionRequested";
+    private String DELETE_MERCHANT_RES_RK = "MerchantDeleted";
 
     @Before
     public void setup() {

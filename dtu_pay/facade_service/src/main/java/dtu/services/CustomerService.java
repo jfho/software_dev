@@ -24,16 +24,16 @@ public class CustomerService {
 
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
 
-    private final String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
-    private final String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
-    private final String CUSTOMER_REPORT_RES_RK = "reports.customerreport.response";
-    private final String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
+    private final String REGISTER_CUSTOMER_RES_RK = "CustomerRegistered";
+    private final String GET_CUSTOMER_RES_RK = "CustomerFetched";
+    private final String CUSTOMER_REPORT_RES_RK = "CustomerReportFetched";
+    private final String DELETE_CUSTOMER_RES_RK = "CustomerDeleted";
     private final String TOKENS_REGISTER_RES_RK = "TokensGenerated";
 
-    private final String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
-    private final String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
-    private final String CUSTOMER_REPORT_REQ_RK = "facade.customerreport.request";
-    private final String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
+    private final String REGISTER_CUSTOMER_REQ_RK = "CustomerRegistrationRequested";
+    private final String GET_CUSTOMER_REQ_RK = "CustomerGetRequested";
+    private final String CUSTOMER_REPORT_REQ_RK = "CustomerReportRequested";
+    private final String DELETE_CUSTOMER_REQ_RK = "CustomerDeletionRequested";
     private final String TOKENS_REGISTER_REQ_RK = "TokensRequested";
 
     public CustomerService(MessageQueue mq) {

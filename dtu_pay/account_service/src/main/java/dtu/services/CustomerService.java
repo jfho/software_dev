@@ -17,13 +17,13 @@ public class CustomerService {
     private final String BANKACCOUNT_CUSTOMER_REQ_RK = "TokenValidated";
     private final String BANKACCOUNT_CUSTOMER_RES_RK = "CustomerBankAccountRetrieved";
 
-    private String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
-    private String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
-    private String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
+    private String REGISTER_CUSTOMER_REQ_RK = "CustomerRegistrationRequested";
+    private String GET_CUSTOMER_REQ_RK = "CustomerGetRequested";
+    private String DELETE_CUSTOMER_REQ_RK = "CustomerDeletionRequested";
 
-    private String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
-    private String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
-    private String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
+    private String REGISTER_CUSTOMER_RES_RK = "CustomerRegistered";
+    private String GET_CUSTOMER_RES_RK = "CustomerFetched";
+    private String DELETE_CUSTOMER_RES_RK = "CustomerDeleted";
 
     
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
