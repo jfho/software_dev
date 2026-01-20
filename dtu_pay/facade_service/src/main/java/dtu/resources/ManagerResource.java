@@ -10,16 +10,18 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/_manager")
 public class ManagerResource {
-    private ManagerService controller = new ManagerService(new RabbitMqQueue());
+    private ManagerService service = new ManagerService(new RabbitMqQueue());
 
     @GET
     @Path("/reports")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Transaction> getReports(){
-        return controller.getAllTransactions();
+    public Response getReports(){
+        List<Transaction> transactions = service.getAllTransactions();
+        return Response.ok(transactions).build();
     }
 
 }
