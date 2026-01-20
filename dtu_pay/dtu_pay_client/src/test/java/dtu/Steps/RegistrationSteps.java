@@ -141,9 +141,7 @@ public class RegistrationSteps {
 
     @Then("an error message is returned saying {string}")
     public void errorMessageReturned(String msg) {
-        System.out.println("Is null: " + (state.lastException == null));
         assertNotNull(state.lastException);
-        System.out.println("msg: " + state.lastException.getMessage());
         assertTrue(state.lastException.getMessage().contains(msg));
     }
 }

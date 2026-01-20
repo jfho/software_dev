@@ -16,11 +16,12 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/merchants")
+@Path("/_merchant")
 public class MerchantResource {
     private static final MerchantService service = new MerchantService(new RabbitMqQueue());
 
     @POST
+    @Path("/merchants")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Merchant registerMerchant(Merchant merchant) {
@@ -28,27 +29,27 @@ public class MerchantResource {
     }
 
     @GET
-    @Path("/{merchantId}")
+    @Path("/merchants/{merchantId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Merchant getMerchant(@PathParam("merchantId") String merchantId) {
         return service.getMerchant(merchantId);
     }
 
     @DELETE
-    @Path("/{merchantId}")
+    @Path("/merchants/{merchantId}")
     public void deleteMerchant(@PathParam("merchantId") String merchantId) {
         service.deleteMerchant(merchantId);
     }
 
     @GET
-    @Path("/{merchantId}/reports")
+    @Path("/merchants/{merchantId}/reports")
     @Produces(MediaType.APPLICATION_JSON)
     public List<MerchantTransaction> getReport(@PathParam("merchantId") String merchantId) {
         return service.getTransactionsForMerchant(merchantId);
     }
 
     @POST
-    @Path("/{merchantId}/payments")
+    @Path("/merchants/{merchantId}/payments")
     @Consumes(MediaType.APPLICATION_JSON)
     public boolean registerTransaction(@PathParam("merchantId") String merchantId, MerchantTransaction transaction) {
         MerchantTransaction resultTransaction = new MerchantTransaction(transaction.tokenId(), merchantId, transaction.amount());

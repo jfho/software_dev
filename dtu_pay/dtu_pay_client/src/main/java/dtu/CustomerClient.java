@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.Response;
 
 public class CustomerClient extends BaseClient {
 
-    private String CUSTOMERS_PATH = "customers";
+    private String CUSTOMERS_PATH = "_customer/customers";
 
     public Customer register(Customer customer) {
         Response res = r.path(CUSTOMERS_PATH)

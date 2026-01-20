@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.Response;
 
 public class MerchantClient extends BaseClient {
 
-    private String MERCHANTS_PATH = "merchants";
+    private String MERCHANTS_PATH = "/_merchant/merchants";
 
     public Merchant register(Merchant merchant) {
         Response res = r.path(MERCHANTS_PATH)

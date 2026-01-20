@@ -11,7 +11,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/managers")
+@Path("/_manager")
 public class ManagerResource {
     private ManagerService controller = new ManagerService(new RabbitMqQueue());
 

@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.Response;
 
 public class ManagerClient extends BaseClient {
 
-    private String MANAGERS_PATH = "managers";
+    private String MANAGERS_PATH = "_manager/";
     
     
     public List<Transaction> getReports() {
