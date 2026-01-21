@@ -6,6 +6,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 
@@ -64,7 +71,17 @@ public class CustomerService {
 
         mq.publish(new Event(REGISTER_CUSTOMER_REQ_RK, new Object[] { customer, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to register customer: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal account service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
 
         Customer result = resultEvent.getArgument(0, Customer.class);
         LOG.info("Customer registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
@@ -81,7 +98,17 @@ public class CustomerService {
 
         mq.publish(new Event(GET_CUSTOMER_REQ_RK, new Object[] { customerId, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to get customer: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal account service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
         LOG.info("Details retrieved for customer ID: " + customerId);
 
         return resultEvent.getArgument(0, Customer.class);
@@ -96,7 +123,17 @@ public class CustomerService {
 
         mq.publish(new Event(CUSTOMER_REPORT_REQ_RK, new Object[] { customerId, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to get customer transactions: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal reporting service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
 
         Transaction[] array = resultEvent.getArgument(0, Transaction[].class);
         LOG.info("Report received for customer ID: " + customerId + ". Transactions found: "
@@ -114,7 +151,17 @@ public class CustomerService {
 
         mq.publish(new Event(DELETE_CUSTOMER_REQ_RK, new Object[] { customerId, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to delete customer: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal account service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
         boolean success = resultEvent.getArgument(0, Boolean.class);
         LOG.info("received: success = " + true);
 
@@ -130,7 +177,17 @@ public class CustomerService {
 
         mq.publish(new Event(TOKENS_REGISTER_REQ_RK, new Object[] { customerId, amount, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to create tokens: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal token service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
 
         String[] tokens = resultEvent.getArgument(0, String[].class);
         LOG.info("Tokens generated successfully. Count: " + (tokens != null ? tokens.length : 0));
