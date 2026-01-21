@@ -38,19 +38,33 @@ public class PaymentService {
         Transaction receivedTransaction = event.getArgument(0, Transaction.class);
         String correlationId = event.getArgument(1, String.class);
 
-        PendingTransaction transaction = new PendingTransaction();
-        transaction.amount = receivedTransaction.amount();
+        LOG.info("Payment started for correlationId: " + correlationId);
 
-        pendingTransactions.put(correlationId, transaction);
+        pendingTransactions.compute(correlationId, (id, transaction) -> {
+            if (transaction == null) {
+                transaction = new PendingTransaction();
+            }
+            transaction.amount = receivedTransaction.amount();
+            return transaction;
+        });
+
+        evaluatePending(correlationId);
     }
 
     public void handleCustomerBankRetreived(Event event) {
         String customerId = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
 
-        PendingTransaction update = pendingTransactions.get(correlationId);
-        update.bankCusId = customerId;
-        pendingTransactions.put(correlationId, update);
+        LOG.info("Customer bank info received for correlationId: " + correlationId);
+
+        pendingTransactions.compute(correlationId, (id, transaction) -> {
+            if (transaction == null) {
+                transaction = new PendingTransaction();
+            }
+            transaction.bankCusId = customerId;
+            return transaction;
+        });
+
         evaluatePending(correlationId);
     }
 
@@ -58,27 +72,40 @@ public class PaymentService {
         String merchantId = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
 
-        PendingTransaction update = pendingTransactions.get(correlationId);
-        update.bankMerId = merchantId;
-        pendingTransactions.put(correlationId, update);
+        LOG.info("Merchant bank info received for correlationId: " + correlationId);
+
+        pendingTransactions.compute(correlationId, (id, transaction) -> {
+            if (transaction == null) {
+                transaction = new PendingTransaction();
+            }
+            transaction.bankMerId = merchantId;
+            return transaction;
+        });
+
         evaluatePending(correlationId);
     }
 
     private void evaluatePending(String correlationId) {
         PendingTransaction transaction = pendingTransactions.get(correlationId);
-        boolean transferSuccessful = false;
-        if (transaction.bankCusId != null &&
-                transaction.bankMerId != null &&
-                transaction.amount != null) {
-            transferSuccessful = bankClient.transfer(transaction.bankCusId, transaction.bankMerId, transaction.amount);
-            pendingTransactions.remove(correlationId);
+        if (transaction == null ||
+                transaction.bankCusId == null ||
+                transaction.bankMerId == null ||
+                transaction.amount == null) {
+            return;
         }
 
+        LOG.info("All info present. Initiating bank transfer for correlationId: " + correlationId);
+        boolean transferSuccessful = bankClient.transfer(transaction.bankCusId, transaction.bankMerId,
+                transaction.amount);
+
         if (transferSuccessful) {
+            LOG.info("Transfer successful for correlationId: " + correlationId);
             mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { true, correlationId }));
         } else {
-            LOG.warn("Transaction failed at bank level.");
+            LOG.warn("Transaction failed (or incomplete data) for correlationId: " + correlationId);
             mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
         }
+
+        pendingTransactions.remove(correlationId);
     }
 }

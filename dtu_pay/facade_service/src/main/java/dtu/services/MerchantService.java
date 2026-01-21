@@ -138,8 +138,8 @@ public class MerchantService {
         mq.publish(new Event(PAYMENTS_REGISTER_REQ_RK, new Object[] { transaction, correlationId }));
 
         Event resultEvent = future.join();
-        Transaction resultTransaction = resultEvent.getArgument(0, Transaction.class);
-        if (resultTransaction == null) {
+        Boolean resultTransaction = resultEvent.getArgument(0, Boolean.class);
+        if (resultTransaction) {
             LOG.warn("Transaction failed!");
             return false;
         } else {
