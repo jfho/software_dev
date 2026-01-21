@@ -7,9 +7,8 @@ import org.jboss.logging.Logger;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.Database;
-import dtu.models.Customer;
 import dtu.models.Merchant;
-import jakarta.ws.rs.NotFoundException;
+import dtu.models.Transaction;
 
 public class MerchantService {
     private final Database db = Database.getInstance();
@@ -68,7 +67,8 @@ public class MerchantService {
 
         queue.addHandler(BANKACCOUNT_MERCHANT_REQ_RK, e -> {
             LOG.info("received merchant bank account request message");
-            String merchantId = e.getArgument(0, String.class);
+            Transaction transaction = e.getArgument(0, Transaction.class);
+            String merchantId = transaction.merchantId();
             String corrId = e.getArgument(1, String.class);
             LOG.info("merchantId: " + merchantId + ", corrId: " + corrId);
 

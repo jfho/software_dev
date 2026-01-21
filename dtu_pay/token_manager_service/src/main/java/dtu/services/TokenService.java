@@ -9,6 +9,7 @@ import org.jboss.logging.Logger;
 
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
+import dtu.models.Transaction;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.Set;
@@ -24,10 +25,10 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String createTokensRequest = "PaymentRequested";
-    private String createTokensResponse = "TokenValidated";
-    private String customerIdRequest = "TokensRequested";
-    private String customerIdResponse = "TokensGenerated";
+    private String createTokensRequest = "TokensRequested";
+    private String createTokensResponse = "TokensGenerated";
+    private String customerIdRequest = "PaymentRequested";
+    private String customerIdResponse = "TokenValidated";
 
     private static final Logger LOG = Logger.getLogger(TokenService.class);
 
@@ -52,7 +53,8 @@ public class TokenService {
 
     public void policyValidateToken(Event event) {
         LOG.info("Checking token");
-        String tokenId = event.getArgument(0, String.class);
+        Transaction transaction = event.getArgument(0, Transaction.class);
+        String tokenId = transaction.tokenId();
         String corrId = event.getArgument(1, String.class);
         String customerId = validateToken(tokenId);
 

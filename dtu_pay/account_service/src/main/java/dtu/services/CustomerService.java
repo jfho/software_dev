@@ -8,7 +8,6 @@ import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
 import dtu.Database;
-import jakarta.ws.rs.NotFoundException;
 
 public class CustomerService {
     private final Database db = Database.getInstance();

@@ -21,6 +21,7 @@ import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
 import dtu.Database;
 import dtu.models.Merchant;
+import dtu.models.Transaction;
 
 public class AccountServiceSteps {
     Database db = Database.getInstance();
@@ -185,7 +186,8 @@ public class AccountServiceSteps {
 
     @When("a bank account request for the merchant with correlation ID {string} is emitted")
     public void merchantBankAccountRequestEmitted(String corrId) {
-        Event event = new Event(BANKACCOUNT_MERCHANT_REQ_RK, new Object[] { merchant.dtupayUuid(), corrId });
+        Transaction transaction = new Transaction(null, merchant.dtupayUuid(), null);
+        Event event = new Event(BANKACCOUNT_MERCHANT_REQ_RK, new Object[] { transaction, corrId });
         mq.publish(event);
     }
 
