@@ -29,6 +29,7 @@ public class TokenService {
     private String createTokensResponse = "TokensGenerated";
     private String customerIdRequest = "PaymentRequested";
     private String customerIdResponse = "TokenValidated";
+    private String CustomerDeleted = "CustomerDeletionRequested";
 
     private static final Logger LOG = Logger.getLogger(TokenService.class);
 
@@ -37,6 +38,23 @@ public class TokenService {
         queue = q;
         queue.addHandler(createTokensRequest, this::policyCreateTokens);
         queue.addHandler(customerIdRequest, this::policyValidateToken);
+        queue.addHandler(CustomerDeleted, this::policyCustomerDeleted);
+    }
+
+
+    public void policyCustomerDeleted(Event event) {
+        String customerId = event.getArgument(0, String.class);
+        
+        deleteCustomer(customerId);
+
+    }
+
+    private void deleteCustomer(String customerId) {
+        List<String> customerTokens = tokenMap.get(customerId);
+        customerTokens.forEach(token -> {
+            tokenToCustomer.remove(token);
+        });
+        tokenMap.remove(customerId);
     }
 
     public void policyCreateTokens(Event event) {
