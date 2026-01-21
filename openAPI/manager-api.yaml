@@ -1,0 +1,58 @@
+openapi: 3.0.3
+
+info:
+  title: Manager Service API
+  description: REST API for managers to retrieve transaction reports
+  version: 1.0.0
+servers:
+  - url: /_manager
+paths:
+  /reports:
+    get:
+      summary: Get transaction reports
+      description: Returns a list of all transactions
+      tags:
+        - Managers
+      responses:
+        '200':
+          description: Successful retrieval of transaction reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Transaction:
+      type: object
+      description: Represents a transaction record
+      properties:
+        tokenId:
+          type: string
+          example: "token-abc123"
+        customerId:
+          type: string
+          example: "customer-42"
+        merchantId:
+          type: string
+          example: "merchant-99"
+        amount:
+          type: string
+          example: "250.75"
+        transactionId:
+          type: string
+          example: "tx-123"
+        timestamp:
+          type: string
+          example: "2024-03-18T14:32:00Z"
+      required:
+        - tokenId
+        - customerId
+        - merchantId
+        - amount
+        - transactionId
+        - timestamp

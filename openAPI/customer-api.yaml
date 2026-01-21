@@ -1,0 +1,184 @@
+openapi: 3.0.3
+
+info:
+  title: Customer Service API
+  description: REST API for managing customers, tokens, and transaction reports
+  version: 1.0.0
+
+servers:
+  - url: /_customer
+
+paths:
+  /customers:
+    post:
+      summary: Register a new customer
+      description: Registers a new customer and returns the created customer
+      tags:
+        - Customers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '201':
+          description: Customer successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+
+        '400':
+          description: Customer registration failed
+        '500':
+          description: Internal server error
+
+  /customers/{customerId}:
+    get:
+      summary: Get customer by ID
+      description: Retrieves a customer by their ID
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Customer not found
+
+    delete:
+      summary: Delete customer
+      description: Deletes a customer by their ID
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Customer successfully deleted
+        '404':
+          description: Customer not found
+
+  /customers/{customerId}/reports:
+    get:
+      summary: Get customer transaction report
+      description: Returns all transactions associated with a customer
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerTransaction'
+        
+  /customers/{customerId}/tokens:
+    post:
+      summary: Create tokens for customer
+      description: Generates tokens for a customer
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+      required: true
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "5"
+      responses:
+        '200':
+          description: Tokens successfully created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+        description: Invalid token request
+        '404':
+          description: Customer not found
+
+components:
+  schemas:
+    Customer:
+      type: object
+      description: Represents a customer
+      properties:
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        cpr:
+          type: string
+          example: "123456-7890"
+        bankAccountUuid:
+          type: string
+          example: "bank-uuid-123"
+        dtupayUuid:
+          type: string
+          example: "dtupay-uuid-456"
+      required:
+        - firstName
+        - lastName
+        - cpr
+        - bankAccountUuid
+        - dtupayUuid
+
+    CustomerTransaction:
+      type: object
+      description: Represents a transaction associated with a customer
+      properties:
+        tokenId:
+          type: string
+          example: "token-abc123"
+        merchantId:
+          type: string
+          example: "merchant-99"
+        amount:
+          type: string
+          example: "100.00"
+        transactionId:
+          type: string
+          example: "tx-789"
+        timestamp:
+          type: string
+          example: "2024-03-18T14:32:00Z"
+      required:
+        - tokenId
+        - merchantId
+        - amount
+        - transactionId
+        - timestamp
