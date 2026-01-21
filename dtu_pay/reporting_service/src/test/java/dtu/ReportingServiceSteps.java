@@ -25,22 +25,24 @@ import dtu.models.RecordedPayment;
 
 public class ReportingServiceSteps {
     Database db = Database.getInstance();
-    ReportService reportService;
-    MessageQueue mq;
-
+    MessageQueue mq = new MockQueue();
+    ReportService reportService = new ReportService(mq);
+    
     Customer customer1 = null;
     Customer customer2 = null;
     Merchant merchant1 = null;
     Merchant merchant2 = null;
 
-    private String TRANSACTION_COMPLETED_RK = "payments.transaction.response";
-    private String MERCHANT_GETTRANSACTIONS_REQ = "facade.merchantreport.request";
-    private String CUSTOMER_GETTRANSACTIONS_REQ = "facade.customerreport.request";
-    private String MANAGER_GETTRANSACTIONS_REQ = "facade.managerreport.request";
+    private String PAYMENT_REQUESTED = "PaymentRequested";
+    private String TOKEN_VALIDATED = "TokenValidated";
+    private String TRANSACTION_COMPLETED_RK = "MoneyTransferFinished";
+    private String MERCHANT_GETTRANSACTIONS_REQ = "MerchantReportRequested";
+    private String CUSTOMER_GETTRANSACTIONS_REQ = "CustomerReportRequested";
+    private String MANAGER_GETTRANSACTIONS_REQ = "ManagerReportRequested";
 
-    private String MERCHANT_GETTRANSACTIONS_RES = "reports.merchantreport.response";
-    private String CUSTOMER_GETTRANSACTIONS_RES = "reports.customerreport.response";
-    private String MANAGER_GETTRANSACTIONS_RES = "reports.managerreport.response";
+    private String MERCHANT_GETTRANSACTIONS_RES = "MerchantReportFetched";
+    private String CUSTOMER_GETTRANSACTIONS_RES = "CustomerReportFetched";
+    private String MANAGER_GETTRANSACTIONS_RES = "ManagerReportFetched";
 
     Gson gson = new Gson();
     Type recordedPaymentListType = new TypeToken<List<RecordedPayment>>() {
@@ -57,8 +59,7 @@ public class ReportingServiceSteps {
 
         retrievedPayments = null;
 
-        mq = new MockQueue();
-        reportService = new ReportService(mq);
+        reportService.clearPendingPayments();
         db.clean();
     }
 
@@ -82,11 +83,15 @@ public class ReportingServiceSteps {
         merchant2 = new Merchant(fn, ln, cpr, bankId, dtupayId);
     }
 
-    @When("a payment event with amount {string} is received from ID {string} to {string}")
-    public void paymentEventReceived(String amount, String customerId, String merchantId) {
-        RecordedPayment payment = new RecordedPayment(customerId, merchantId, amount, null, null, null);
-        Event event = new Event(TRANSACTION_COMPLETED_RK, new Object[] { payment, null });
+    @When("a payment event with amount {string} is received from ID {string} to {string} and correlation id {string}")
+    public void paymentEventReceived(String amount, String customerId, String merchantId, String corrId) {
+        Event event = new Event(TRANSACTION_COMPLETED_RK, new Object[] { Boolean.TRUE, corrId });
+        Event event2 = new Event(TOKEN_VALIDATED, new Object[] { customerId, corrId });
+        RecordedPayment newPayment = new RecordedPayment(null, merchantId, amount, "tokenId", null, null, null);
+        Event event3 = new Event(PAYMENT_REQUESTED, new Object[] {newPayment, corrId});
+        mq.publish(event2);
         mq.publish(event);
+        mq.publish(event3);
     }
 
     @When("the manager requests a list of payments")
@@ -125,8 +130,8 @@ public class ReportingServiceSteps {
     public void the_list_contains_payments_with_amounts(Integer size, String amount1, String amount2, String amount3) {
         assertNotNull(retrievedPayments);
         assertEquals(size.intValue(), retrievedPayments.size());
-        assertEquals(amount1, retrievedPayments.get(0).amount());
-        assertEquals(amount2, retrievedPayments.get(1).amount());
-        assertEquals(amount3, retrievedPayments.get(2).amount());
+        assertEquals(amount1, retrievedPayments.get(0).amount);
+        assertEquals(amount2, retrievedPayments.get(1).amount);
+        assertEquals(amount3, retrievedPayments.get(2).amount);
     }
 }

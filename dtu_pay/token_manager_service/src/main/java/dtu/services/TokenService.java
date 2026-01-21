@@ -9,6 +9,7 @@ import org.jboss.logging.Logger;
 
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
+import dtu.models.Transaction;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.Set;
@@ -24,10 +25,11 @@ public class TokenService {
     
     private MessageQueue queue;
 
-    private String createTokensRequest = "facade.createtokens.request";
-    private String createTokensResponse = "tokens.createtokens.response";
-    private String customerIdRequest = "payments.customerid.request";
-    private String customerIdResponse = "tokens.customerid.response";
+    private String createTokensRequest = "TokensRequested";
+    private String createTokensResponse = "TokensGenerated";
+    private String customerIdRequest = "PaymentRequested";
+    private String customerIdResponse = "TokenValidated";
+    private String CustomerDeleted = "CustomerDeletionRequested";
 
     private static final Logger LOG = Logger.getLogger(TokenService.class);
 
@@ -36,6 +38,23 @@ public class TokenService {
         queue = q;
         queue.addHandler(createTokensRequest, this::policyCreateTokens);
         queue.addHandler(customerIdRequest, this::policyValidateToken);
+        queue.addHandler(CustomerDeleted, this::policyCustomerDeleted);
+    }
+
+
+    public void policyCustomerDeleted(Event event) {
+        String customerId = event.getArgument(0, String.class);
+        
+        deleteCustomer(customerId);
+
+    }
+
+    private void deleteCustomer(String customerId) {
+        List<String> customerTokens = tokenMap.get(customerId);
+        customerTokens.forEach(token -> {
+            tokenToCustomer.remove(token);
+        });
+        tokenMap.remove(customerId);
     }
 
     public void policyCreateTokens(Event event) {
@@ -52,7 +71,8 @@ public class TokenService {
 
     public void policyValidateToken(Event event) {
         LOG.info("Checking token");
-        String tokenId = event.getArgument(0, String.class);
+        Transaction transaction = event.getArgument(0, Transaction.class);
+        String tokenId = transaction.tokenId();
         String corrId = event.getArgument(1, String.class);
         String customerId = validateToken(tokenId);
 

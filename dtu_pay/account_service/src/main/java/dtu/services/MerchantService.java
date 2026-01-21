@@ -7,24 +7,23 @@ import org.jboss.logging.Logger;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.Database;
-import dtu.models.Customer;
 import dtu.models.Merchant;
-import jakarta.ws.rs.NotFoundException;
+import dtu.models.Transaction;
 
 public class MerchantService {
     private final Database db = Database.getInstance();
     MessageQueue queue;
 
-    private String REGISTER_MERCHANT_REQ_RK = "facade.registerMerchant.request";
-    private String GET_MERCHANT_REQ_RK = "facade.getMerchant.request";
-    private String DELETE_MERCHANT_REQ_RK = "facade.deleteMerchant.request";
+    private String REGISTER_MERCHANT_REQ_RK = "MerchantRegistrationRequested";
+    private String GET_MERCHANT_REQ_RK = "MerchantGetRequested";
+    private String DELETE_MERCHANT_REQ_RK = "MerchantDeletionRequested";
 
-    private String REGISTER_MERCHANT_RES_RK = "facade.registerMerchant.response";
-    private String GET_MERCHANT_RES_RK = "facade.getMerchant.response";
-    private String DELETE_MERCHANT_RES_RK = "facade.deleteMerchant.response";
+    private String REGISTER_MERCHANT_RES_RK = "MerchantRegistered";
+    private String GET_MERCHANT_RES_RK = "MerchantFetched";
+    private String DELETE_MERCHANT_RES_RK = "MerchantDeleted";
 
-    private String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
-    private String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
+    private String BANKACCOUNT_MERCHANT_REQ_RK = "PaymentRequested";
+    private String BANKACCOUNT_MERCHANT_RES_RK = "MerchantBankAccountRetrieved";
 
     private static final Logger LOG = Logger.getLogger(MerchantService.class);
 
@@ -68,7 +67,8 @@ public class MerchantService {
 
         queue.addHandler(BANKACCOUNT_MERCHANT_REQ_RK, e -> {
             LOG.info("received merchant bank account request message");
-            String merchantId = e.getArgument(0, String.class);
+            Transaction transaction = e.getArgument(0, Transaction.class);
+            String merchantId = transaction.merchantId();
             String corrId = e.getArgument(1, String.class);
             LOG.info("merchantId: " + merchantId + ", corrId: " + corrId);
 

@@ -38,7 +38,7 @@ Feature: Token
     Scenario: Send customerId associated with a token
         Given a customerId "134" with "5" tokens
         And a token is known to a merchant
-        When the payment service requests a customerId
+        When a customerId request event is emitted
         Then a customerId response includes the customerId "134"
 
     Scenario: Send token list to customer
@@ -46,4 +46,9 @@ Feature: Token
         When the customer requests tokens
         Then the service generates a list of tokens
         And a tokens response includes the list of tokens
+        
+    Scenario: Deleting customers token at customer deletion
+        Given a customerId "345" with "5" tokens
+        When a customer deletion request event is emitted
+        Then the customer and its tokens are deleted
         

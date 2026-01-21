@@ -8,24 +8,23 @@ import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Customer;
 import dtu.Database;
-import jakarta.ws.rs.NotFoundException;
 
 public class CustomerService {
     private final Database db = Database.getInstance();
     MessageQueue queue;
 
+    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "TokenValidated";
+    private final String BANKACCOUNT_CUSTOMER_RES_RK = "CustomerBankAccountRetrieved";
+
+    private String REGISTER_CUSTOMER_REQ_RK = "CustomerRegistrationRequested";
+    private String GET_CUSTOMER_REQ_RK = "CustomerGetRequested";
+    private String DELETE_CUSTOMER_REQ_RK = "CustomerDeletionRequested";
+
+    private String REGISTER_CUSTOMER_RES_RK = "CustomerRegistered";
+    private String GET_CUSTOMER_RES_RK = "CustomerFetched";
+    private String DELETE_CUSTOMER_RES_RK = "CustomerDeleted";
+
     
-    private String REGISTER_CUSTOMER_REQ_RK = "facade.registerCustomer.request";
-    private String GET_CUSTOMER_REQ_RK = "facade.getCustomer.request";
-    private String DELETE_CUSTOMER_REQ_RK = "facade.deleteCustomer.request";
-
-    private String REGISTER_CUSTOMER_RES_RK = "facade.registerCustomer.response";
-    private String GET_CUSTOMER_RES_RK = "facade.getCustomer.response";
-    private String DELETE_CUSTOMER_RES_RK = "facade.deleteCustomer.response";
-
-    private String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
-
     private static final Logger LOG = Logger.getLogger(CustomerService.class);
 
     public CustomerService(MessageQueue q) {
@@ -49,6 +48,7 @@ public class CustomerService {
             LOG.info("received customer registration request");
             Customer customerToRegister = e.getArgument(0, Customer.class);
             String corrId = e.getArgument(1, String.class);
+            LOG.info("Registering customer " + customerToRegister);
 
             Customer newCustomer = registerCustomer(customerToRegister);
 

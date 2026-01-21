@@ -1,8 +1,7 @@
 package dtu.services;
 
+import java.math.BigDecimal;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
@@ -10,124 +9,119 @@ import org.jboss.logging.Logger;
 import dtu.adapters.BankClientInterface;
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
+import dtu.models.PendingTransaction;
 import dtu.models.Transaction;
 
 public class PaymentService {
     MessageQueue mq;
     BankClientInterface bankClient;
-
-    private Map<String, CompletableFuture<String>> pendingRequests = new ConcurrentHashMap<>();
+    private Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
 
     private static final Logger LOG = Logger.getLogger(PaymentService.class);
 
-    private final String PAYMENTS_REGISTER_REQ_RK = "facade.transaction.request";
-    private final String PAYMENTS_REGISTER_RES_RK = "payments.transaction.response";
+    private final String PAYMENTS_REGISTER_REQ_RK = "PaymentRequested";
+    private final String PAYMENTS_REGISTER_RES_RK = "MoneyTransferFinished";
 
-    private final String TOKEN_CUSTOMERID_REQ_RK = "payments.customerid.request";
-    private final String TOKEN_CUSTOMERID_RES_RK = "tokens.customerid.response";
-
-    private final String BANKACCOUNT_CUSTOMER_REQ_RK = "payments.customerbankaccount.request";
-    private final String BANKACCOUNT_MERCHANT_REQ_RK = "payments.merchantbankaccount.request";
-    private final String BANKACCOUNT_CUSTOMER_RES_RK = "accounts.customerbankaccount.response";
-    private final String BANKACCOUNT_MERCHANT_RES_RK = "accounts.merchantbankaccount.response";
+    private final String BANKACCOUNT_CUSTOMER_RES_RK = "CustomerBankAccountRetrieved";
+    private final String BANKACCOUNT_MERCHANT_RES_RK = "MerchantBankAccountRetrieved";
 
     public PaymentService(MessageQueue mq, BankClientInterface bankClient) {
         this.mq = mq;
         this.bankClient = bankClient;
 
-        this.mq.addHandler(PAYMENTS_REGISTER_REQ_RK, this::handleRegistration);
-        this.mq.addHandler(TOKEN_CUSTOMERID_RES_RK, this::handleResponse);
-        this.mq.addHandler(BANKACCOUNT_CUSTOMER_RES_RK, this::handleResponse);
-        this.mq.addHandler(BANKACCOUNT_MERCHANT_RES_RK, this::handleResponse);
+        this.mq.addHandler(PAYMENTS_REGISTER_REQ_RK, this::handlePayment);
+        this.mq.addHandler(BANKACCOUNT_CUSTOMER_RES_RK, this::handleCustomerBankRetreived);
+        this.mq.addHandler(BANKACCOUNT_MERCHANT_RES_RK, this::handleMerchantBankRetreived);
     }
 
-    public void handleRegistration(Event event) {
-        Transaction transaction = event.getArgument(0, Transaction.class);
-        String correlationId = event.getArgument(1, String.class);
-        try {
-            LOG.info("Processing payment registration for amount: " + transaction.amount());
-            registerTransaction(transaction, correlationId);
-        } catch (Exception e) {
-            LOG.warn("Registering transaction failed: " + e.getMessage());
-        }
-    }
-
-    public void handleResponse(Event event) {
-        String result = event.getArgument(0, String.class);
+    public void handlePayment(Event event) {
+        Transaction receivedTransaction = event.getArgument(0, Transaction.class);
         String correlationId = event.getArgument(1, String.class);
 
-        CompletableFuture<String> future = pendingRequests.remove(correlationId);
+        LOG.info("Payment started for correlationId: " + correlationId);
 
-        if (future != null) {
-            future.complete(result);
-        } else {
-            LOG.warn("Received response for unknown request ID: " + correlationId + ". Event Type: " + event.getType());
-        }
+        pendingTransactions.compute(correlationId, (id, transaction) -> {
+            if (transaction == null) {
+                transaction = new PendingTransaction();
+            }
+            if (receivedTransaction == null || receivedTransaction.amount() == null) {
+                transaction.amount = BigDecimal.valueOf(-1);
+            } else {
+                transaction.amount = receivedTransaction.amount();
+            }
+            return transaction;
+        });
+
+        evaluatePending(correlationId);
     }
 
-    private String getCustomerIdFromToken(String tokenId) throws Exception {
-        String correlationId = UUID.randomUUID().toString();
-        CompletableFuture<String> future = new CompletableFuture<>();
-        pendingRequests.put(correlationId, future);
+    public void handleCustomerBankRetreived(Event event) {
+        String customerBankId = event.getArgument(0, String.class);
+        String correlationId = event.getArgument(1, String.class);
 
-        mq.publish(new Event(TOKEN_CUSTOMERID_REQ_RK, new Object[] { tokenId, correlationId }));
+        LOG.info("Customer bank info received for correlationId: " + correlationId);
 
-        String customerId = future.join();
+        pendingTransactions.compute(correlationId, (id, transaction) -> {
+            if (transaction == null) {
+                transaction = new PendingTransaction();
+            }
+            transaction.bankCusId = (customerBankId == null) ? "" : customerBankId;
+            return transaction;
+        });
 
-        if (customerId == null || customerId.isEmpty()) {
-            //throw new Exception("Invalid token: Customer ID could not be retrieved.");
-            return null;
-        }
-        
-        return customerId;
+        evaluatePending(correlationId);
     }
 
-    public String getBankAccountId(String dtuPayId, String routingKey) throws Exception {
-        String correlationId = UUID.randomUUID().toString();
-        CompletableFuture<String> future = new CompletableFuture<>();
-        pendingRequests.put(correlationId, future);
+    public void handleMerchantBankRetreived(Event event) {
+        String merchantBankId = event.getArgument(0, String.class);
+        String correlationId = event.getArgument(1, String.class);
 
-        mq.publish(new Event(routingKey, new Object[] { dtuPayId, correlationId }));
+        LOG.info("Merchant bank info received for correlationId: " + correlationId);
 
-        String bankAccountId = future.join();
+        pendingTransactions.compute(correlationId, (id, transaction) -> {
+            if (transaction == null) {
+                transaction = new PendingTransaction();
+            }
+            transaction.bankMerId = (merchantBankId == null) ? "" : merchantBankId;
+            return transaction;
+        });
 
-        if (bankAccountId == null || bankAccountId.isEmpty()) {
-            //throw new Exception("Bank Account ID not found for ID: " + dtuPayId);
-            return null;
-        }
-
-        return bankAccountId;
+        evaluatePending(correlationId);
     }
 
-    public void registerTransaction(Transaction transaction, String correlationId) throws Exception {
-        LOG.info("Step 1: resolving customerId from token...");
-        String customerId = getCustomerIdFromToken(transaction.tokenId());
-        LOG.info("Resolved CustomerId: " + customerId);
+    private void evaluatePending(String correlationId) {
+        PendingTransaction transaction = pendingTransactions.get(correlationId);
+        if (transaction == null ||
+                transaction.bankCusId == null ||
+                transaction.bankMerId == null ||
+                transaction.amount == null) {
+            return;
+        }
 
-        LOG.info("Step 2: resolving customer bank account...");
-        String customerBankAccountId = getBankAccountId(customerId, BANKACCOUNT_CUSTOMER_REQ_RK);
-        LOG.info("Resolved Customer Bank Account: " + customerBankAccountId);
+        if (transaction.bankCusId.isEmpty() || transaction.bankMerId.isEmpty()
+                || transaction.amount.compareTo(BigDecimal.ZERO) < 0) {
+            LOG.warn("Transaction failed: Customer or Merchant not found for " + correlationId);
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
+            pendingTransactions.remove(correlationId);
+            return;
+        }
 
-        LOG.info("Step 3: resolving merchant bank account...");
-        String merchantBankAccountId = getBankAccountId(transaction.merchantId(), BANKACCOUNT_MERCHANT_REQ_RK);
-        LOG.info("Resolved Merchant Bank Account: " + merchantBankAccountId);
-
-        LOG.info("Step 4: Executing bank transfer...");
-        boolean transferSuccessful = customerId != null 
-            && customerBankAccountId != null
-            && merchantBankAccountId != null
-            && bankClient.transfer(customerBankAccountId, merchantBankAccountId, transaction.amount());
-        LOG.info("Transfer result: " + transferSuccessful);
+        LOG.info("All info present. Initiating bank transfer for correlationId: " + correlationId);
+        boolean transferSuccessful = bankClient.transfer(transaction.bankCusId, transaction.bankMerId,
+                transaction.amount);
 
         if (transferSuccessful) {
-            LOG.info("Transaction complete. Emitting report.");
-            Transaction resultTransaction = new Transaction(transaction.tokenId(), transaction.merchantId(),
-                    transaction.amount(), customerId);
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK,
-                    new Object[] { resultTransaction, correlationId }));
+            LOG.info("Transfer successful for correlationId: " + correlationId);
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { true, correlationId }));
         } else {
-            LOG.warn("Transaction failed at bank level.");
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { null, correlationId }));
+            LOG.warn("Transaction failed (or incomplete data) for correlationId: " + correlationId);
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
         }
+
+        pendingTransactions.remove(correlationId);
+    }
+
+    public Map<String, PendingTransaction> getPendingTransactions() {
+        return pendingTransactions;
     }
 }

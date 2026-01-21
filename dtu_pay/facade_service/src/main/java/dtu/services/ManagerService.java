@@ -4,8 +4,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.Arrays;
 import java.util.List;
+
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
@@ -22,7 +29,7 @@ public class ManagerService {
 
     public ManagerService(MessageQueue mq) {
         this.mq = mq;
-        this.mq.addHandler("reports.managerreport.response", this::handleResponse);
+        this.mq.addHandler("ManagerReportFetched", this::handleResponse);
     }
 
     public void handleResponse(Event event) {
@@ -42,9 +49,19 @@ public class ManagerService {
         CompletableFuture<Event> future = new CompletableFuture<>();
         pendingRequests.put(correlationId, future);
 
-        mq.publish(new Event("facade.managerreport.request", new Object[] { correlationId }));
+        mq.publish(new Event("ManagerReportRequested", new Object[] { correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to get manager transactions: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal reporting service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
 
         Transaction[] array = resultEvent.getArgument(0, Transaction[].class);
 
