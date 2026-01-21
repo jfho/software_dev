@@ -93,6 +93,6 @@ public class CustomerResource {
                     .type(MediaType.TEXT_PLAIN)
                     .build());
         }
-        return Response.ok(tokens).build();
+        return Response.status(Response.Status.CREATED).entity(tokens).build();
     }
 }
