@@ -38,7 +38,7 @@ Feature: Token
     Scenario: Send customerId associated with a token
         Given a customerId "134" with "5" tokens
         And a token is known to a merchant
-        When the payment service requests a customerId
+        When a customerId request event is emitted
         Then a customerId response includes the customerId "134"
 
     Scenario: Send token list to customer

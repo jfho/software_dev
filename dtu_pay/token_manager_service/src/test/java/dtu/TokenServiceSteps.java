@@ -6,10 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.jboss.logging.Logger;
-
 import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
+import dtu.models.Transaction;
 import dtu.services.TokenService;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
@@ -28,10 +27,10 @@ public class TokenServiceSteps {
     private MessageQueue mq = new MockQueue();
     private TokenService tc = new TokenService(mq);
 
-    private String createTokensRequest = "PaymentRequested";
-    private String createTokensResponse = "TokenValidated";
-    private String customerIdRequest = "TokensRequested";
-    private String customerIdResponse = "TokensGenerated";
+    private String createTokensRequest = "TokensRequested";
+    private String createTokensResponse = "TokensGenerated";
+    private String customerIdRequest = "PaymentRequested";
+    private String customerIdResponse = "TokenValidated";
     
     @After
     public void clearTheData() {
@@ -74,14 +73,15 @@ public class TokenServiceSteps {
         validationCustomerId = tc.validateToken(tokenId);
     }
 
-    @When("the payment service requests a customerId")
-    public void thePaymentServiceRequestsACustomerId() {
+    @When("a customerId request event is emitted")
+    public void aCustomerIdRequestEventIsEmitted() {
         mq.addHandler(customerIdResponse, event -> {
             this.receivedEvent = event;
         });
     
         correlationId = "string";
-        mq.publish(new Event(customerIdResponse, new Object[] {customerId, correlationId} ));
+        Transaction transaction = new Transaction(tokenId, customerId, correlationId);
+        mq.publish(new Event(customerIdRequest, new Object[] {transaction, correlationId} ));
     }
 
     @When("the customer requests tokens")
