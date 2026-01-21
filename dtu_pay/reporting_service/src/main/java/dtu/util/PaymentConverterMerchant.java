@@ -13,9 +13,9 @@ public class PaymentConverterMerchant {
     ) {
         return recordedPayments.stream()
             .map(payment -> new MerchantTransaction(
-                payment.tokenId(),
-                payment.merchantId(),
-                payment.amount()
+                payment.tokenId,
+                payment.merchantId,
+                payment.amount
             ))
             .collect(Collectors.toList());
     }   

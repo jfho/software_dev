@@ -2,7 +2,9 @@ package dtu;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
@@ -17,7 +19,11 @@ public class ReportService {
     MessageQueue queue;
     Database db = Database.getInstance();
 
+    private Map<String, RecordedPayment> pendingRecords = new ConcurrentHashMap<>();
+
     private String TRANSACTION_COMPLETED_RK = "MoneyTransferFinished";
+    private String PAYMENT_REQUESTED = "PaymentRequested";
+    private String TOKEN_VALIDATED = "TokenValidated";
     private String MERCHANT_GETTRANSACTIONS_REQ = "MerchantReportRequested";
     private String CUSTOMER_GETTRANSACTIONS_REQ = "CustomerReportRequested";
     private String MANAGER_GETTRANSACTIONS_REQ = "ManagerReportRequested";
@@ -62,26 +68,126 @@ public class ReportService {
 
         });
 
-        queue.addHandler(TRANSACTION_COMPLETED_RK, e -> {
-            LOG.info("Received a transaction report");
-            RecordedPayment receivedPayment = e.getArgument(0, RecordedPayment.class);
 
-            if (receivedPayment == null) {
-                // failed transaction - nothing to save
-                LOG.info("Ignoring failed transaction");
-                return;
+        queue.addHandler(PAYMENT_REQUESTED, e -> {
+
+            RecordedPayment pendingRecord = e.getArgument(0, RecordedPayment.class);
+            String corrId = e.getArgument(1, String.class);
+
+            if (pendingRecords.containsKey(corrId)) {
+                
+                pendingRecords.compute(corrId, (id, trans) -> {
+                    trans.amount = pendingRecord.amount;
+                    trans.merchantId = pendingRecord.merchantId;
+                    trans.tokenId = pendingRecord.tokenId;
+
+                    return trans;
+                });
+
+                evaluatePending(corrId);
+
+            } else {
+                String timestamp = Instant.now().toString();
+                String transactionId = UUID.randomUUID().toString();
+
+                RecordedPayment updatePayment = new RecordedPayment(
+                    null, 
+                    pendingRecord.merchantId, 
+                    pendingRecord.amount, 
+                    pendingRecord.tokenId, 
+                    transactionId, 
+                    timestamp, 
+                    null);
+
+                pendingRecords.put(corrId, updatePayment);
             }
-            String timestamp = Instant.now().toString();
-
-            String transactionId = UUID.randomUUID().toString();
-            RecordedPayment payment = new RecordedPayment(receivedPayment.customerId(), receivedPayment.merchantId(),
-                    receivedPayment.amount(), receivedPayment.tokenId(), transactionId, timestamp);
-
-            LOG.info("customerId: " + payment.customerId() + ", merchantId: " + payment.merchantId() + ", amount: "
-                    + payment.amount());
-
-            db.addPayment(payment);
         });
+
+        queue.addHandler(TRANSACTION_COMPLETED_RK, e -> {
+
+            Boolean transferSuccessful = e.getArgument(0, Boolean.class);
+            String corrId = e.getArgument(1, String.class);
+
+            if (pendingRecords.containsKey(corrId)) {
+                
+                pendingRecords.compute(corrId, (id, trans) -> {
+                    trans.successful = transferSuccessful;
+                    return trans;
+                });
+
+                evaluatePending(corrId);
+
+            } else {
+                String timestamp = Instant.now().toString();
+                String transactionId = UUID.randomUUID().toString();
+
+                RecordedPayment updatePayment = new RecordedPayment(
+                    null, 
+                    null, 
+                    null, 
+                    null, 
+                    transactionId, 
+                    timestamp, 
+                    transferSuccessful);
+
+                pendingRecords.put(corrId, updatePayment);
+            }
+        });
+
+        queue.addHandler(TOKEN_VALIDATED, e -> {
+            String customerId = e.getArgument(0, String.class);
+            String corrId = e.getArgument(1, String.class);
+
+            if (pendingRecords.containsKey(corrId)) {
+                
+                pendingRecords.compute(corrId, (id, trans) -> {
+                    trans.customerId = customerId;
+                    return trans;
+                });
+
+                evaluatePending(corrId);
+
+            } else {
+                String timestamp = Instant.now().toString();
+                String transactionId = UUID.randomUUID().toString();
+
+                RecordedPayment updatePayment = new RecordedPayment(
+                    customerId, 
+                    null, 
+                    null, 
+                    null, 
+                    transactionId, 
+                    timestamp, 
+                    null);
+
+                pendingRecords.put(corrId, updatePayment);
+            }
+        });
+    }
+
+    private void evaluatePending(String corrId) {
+        RecordedPayment transaction = pendingRecords.get(corrId);
+
+        // Check is record is finished
+        if (transaction.customerId != null &&
+            transaction.merchantId != null &&
+            transaction.amount != null &&
+            transaction.tokenId != null &&
+            transaction.transactionId != null &&
+            transaction.timestamp != null &&
+            transaction.successful != null
+        ) {
+
+            // Remove finished record, only add to db if successful
+            if (transaction.successful) {
+                db.addPayment(transaction);                    
+            } 
+            pendingRecords.remove(corrId);
+        } 
+    }
+
+    public void clearPendingPayments() {
+        pendingRecords.clear();
     }
 
     public List<RecordedPayment> getAllTransactions() {
@@ -90,7 +196,7 @@ public class ReportService {
 
     public List<RecordedPayment> getTransactionsForCustomer(String customerId) {
         List<RecordedPayment> payments = db.listPayments();
-        return payments.stream().filter(p -> p.customerId().equals(customerId)).toList();
+        return payments.stream().filter(p -> p.customerId.equals(customerId)).toList();
     }
 
     public List<MerchantTransaction> getTransactionsForMerchant(String merchantId) {
