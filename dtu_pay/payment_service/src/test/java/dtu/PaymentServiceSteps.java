@@ -1,12 +1,15 @@
 package dtu;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
-
+import java.util.Map;
 import java.util.UUID;
 
 import dtu.messagingUtils.Event;
+import dtu.models.PendingTransaction;
 import dtu.models.Transaction;
 import dtu.services.PaymentService;
 import io.cucumber.java.en.Given;
@@ -28,7 +31,8 @@ public class PaymentServiceSteps {
 
     @Given("a transaction with token {string}, amount {string} kr and merchant id {string}")
     public void a_transaction_with_token_amount_kr_and_merchant_id(String tokenId, String amount, String merchantId) {
-        transaction = new Transaction(tokenId, merchantId, new BigDecimal(amount), null);
+        BigDecimal transactionAmount = amount.isEmpty() ? null : new BigDecimal(amount);
+        transaction = new Transaction(tokenId, merchantId, transactionAmount, null);
     }
 
     @When("the payment is received by the payment service")
@@ -42,12 +46,14 @@ public class PaymentServiceSteps {
 
     @When("a customer bank account with id {string} is received")
     public void a_customer_bank_account_with_id_is_received(String customerBankId) {
+        customerBankId = (customerBankId.equals("null")) ? null : customerBankId;
         mq.publish(new Event(BANKACCOUNT_CUSTOMER_RES_RK, new Object[] {
                 customerBankId, correlationId }));
     }
 
     @When("a merchant bank account with id {string} is received")
     public void a_merchant_bank_account_with_id_is_received(String merchantBankId) {
+        merchantBankId = (merchantBankId.equals("null")) ? null : merchantBankId;
         mq.publish(new Event(BANKACCOUNT_MERCHANT_RES_RK, new Object[] {
                 merchantBankId, correlationId }));
     }
@@ -55,5 +61,16 @@ public class PaymentServiceSteps {
     @Then("the payment is successful")
     public void the_payment_is_successful() {
         assertTrue(successfulTransfer);
+    }
+
+    @Then("the payment is unsuccessful")
+    public void the_payment_is_unsuccessful() {
+        assertFalse(successfulTransfer);
+    }
+
+    @Then("the transaction is removed from the pending list")
+    public void the_transaction_is_removed_from_the_pending_list() {
+        Map<String, PendingTransaction> transactions = paymentService.getPendingTransactions();
+        assertEquals(null, transactions.get(correlationId));
     }
 }

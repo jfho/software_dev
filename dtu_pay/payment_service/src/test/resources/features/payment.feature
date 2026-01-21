@@ -1,7 +1,37 @@
-Feature: Payment
-    Scenario: Successful payment    
-        Given a transaction with token "fb96b25f-f4f4-4664-a9a2-c4be60fea2a6", amount "10" kr and merchant id "d98d6ffe-6033-4d18-9297-0021e95fe6d3"
-        When the payment is received by the payment service
-        And a customer bank account with id "019bdbc8-9904-784a-8bfa-3f450ebfe2d6" is received
-        And a merchant bank account with id "9c30e743-a22f-4406-b1a0-52360f0e5e2a" is received
-        Then the payment is successful
+Feature: Payment Service
+  Scenario: Successful payment
+    Given a transaction with token "valid-token", amount "10" kr and merchant id "mer-123"
+    When the payment is received by the payment service
+    And a customer bank account with id "cus-bank-123" is received
+    And a merchant bank account with id "mer-bank-123" is received
+    Then the payment is successful
+    And the transaction is removed from the pending list
+
+  Scenario: Payment fails because customer is null
+    Given a transaction with token "invalid-token", amount "10" kr and merchant id "mer-123"
+    When the payment is received by the payment service
+    And a customer bank account with id "null" is received
+    And a merchant bank account with id "mer-bank-123" is received
+    Then the payment is unsuccessful
+    And the transaction is removed from the pending list
+
+  Scenario: Payment fails because merchant is null
+    Given a transaction with token "valid-token", amount "10" kr and merchant id "mer-123"
+    When the payment is received by the payment service
+    And a customer bank account with id "cus-bank-123" is received
+    And a merchant bank account with id "null" is received
+    Then the payment is unsuccessful
+
+  Scenario: Payment fails because amount is null
+    Given a transaction with token "valid-token", amount "" kr and merchant id "mer-123"
+    When the payment is received by the payment service
+    And a customer bank account with id "cus-bank-123" is received
+    And a merchant bank account with id "mer-bank-123" is received
+    Then the payment is unsuccessful
+  
+  Scenario: Payment fails because amount is negative
+    Given a transaction with token "valid-token", amount "-10" kr and merchant id "mer-123"
+    When the payment is received by the payment service
+    And a customer bank account with id "cus-bank-123" is received
+    And a merchant bank account with id "mer-bank-123" is received
+    Then the payment is unsuccessful

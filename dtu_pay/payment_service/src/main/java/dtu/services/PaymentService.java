@@ -1,5 +1,6 @@
 package dtu.services;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,7 +15,6 @@ import dtu.models.Transaction;
 public class PaymentService {
     MessageQueue mq;
     BankClientInterface bankClient;
-
     private Map<String, PendingTransaction> pendingTransactions = new ConcurrentHashMap<>();
 
     private static final Logger LOG = Logger.getLogger(PaymentService.class);
@@ -44,7 +44,11 @@ public class PaymentService {
             if (transaction == null) {
                 transaction = new PendingTransaction();
             }
-            transaction.amount = receivedTransaction.amount();
+            if (receivedTransaction == null || receivedTransaction.amount() == null) {
+                transaction.amount = BigDecimal.valueOf(-1);
+            } else {
+                transaction.amount = receivedTransaction.amount();
+            }
             return transaction;
         });
 
@@ -52,7 +56,7 @@ public class PaymentService {
     }
 
     public void handleCustomerBankRetreived(Event event) {
-        String customerId = event.getArgument(0, String.class);
+        String customerBankId = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
 
         LOG.info("Customer bank info received for correlationId: " + correlationId);
@@ -61,7 +65,7 @@ public class PaymentService {
             if (transaction == null) {
                 transaction = new PendingTransaction();
             }
-            transaction.bankCusId = customerId;
+            transaction.bankCusId = (customerBankId == null) ? "" : customerBankId;
             return transaction;
         });
 
@@ -69,7 +73,7 @@ public class PaymentService {
     }
 
     public void handleMerchantBankRetreived(Event event) {
-        String merchantId = event.getArgument(0, String.class);
+        String merchantBankId = event.getArgument(0, String.class);
         String correlationId = event.getArgument(1, String.class);
 
         LOG.info("Merchant bank info received for correlationId: " + correlationId);
@@ -78,7 +82,7 @@ public class PaymentService {
             if (transaction == null) {
                 transaction = new PendingTransaction();
             }
-            transaction.bankMerId = merchantId;
+            transaction.bankMerId = (merchantBankId == null) ? "" : merchantBankId;
             return transaction;
         });
 
@@ -91,6 +95,14 @@ public class PaymentService {
                 transaction.bankCusId == null ||
                 transaction.bankMerId == null ||
                 transaction.amount == null) {
+            return;
+        }
+
+        if (transaction.bankCusId.isEmpty() || transaction.bankMerId.isEmpty()
+                || transaction.amount.compareTo(BigDecimal.ZERO) < 0) {
+            LOG.warn("Transaction failed: Customer or Merchant not found for " + correlationId);
+            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
+            pendingTransactions.remove(correlationId);
             return;
         }
 
@@ -107,5 +119,9 @@ public class PaymentService {
         }
 
         pendingTransactions.remove(correlationId);
+    }
+
+    public Map<String, PendingTransaction> getPendingTransactions() {
+        return pendingTransactions;
     }
 }
