@@ -6,6 +6,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 
@@ -67,7 +74,17 @@ public class MerchantService {
 
         mq.publish(new Event(REGISTER_MERCHANT_REQ_RK, new Object[] { merchant, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to register merchant: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal account service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
         Merchant result = resultEvent.getArgument(0, Merchant.class);
         LOG.info("Merchant registration successful. Assigned ID: " + (result != null ? result.dtupayUuid() : "null"));
 
@@ -83,7 +100,17 @@ public class MerchantService {
 
         mq.publish(new Event(GET_MERCHANT_REQ_RK, new Object[] { merchantId, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to get merchant: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal account service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
         LOG.info("Details retrieved for merchant ID: " + merchantId);
 
         return resultEvent.getArgument(0, Merchant.class);
@@ -98,7 +125,17 @@ public class MerchantService {
 
         mq.publish(new Event(MERCHANT_REPORT_REQ_RK, new Object[] { merchantId, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to get merchant transactions: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal reporting service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
 
         MerchantTransaction[] array = resultEvent.getArgument(0, MerchantTransaction[].class);
 
@@ -117,7 +154,17 @@ public class MerchantService {
 
         mq.publish(new Event(DELETE_MERCHANT_REQ_RK, new Object[] { merchantId, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to delete merchant: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal account service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
         boolean success = resultEvent.getArgument(0, Boolean.class);
         LOG.info("received: success = " + true);
 
@@ -133,14 +180,24 @@ public class MerchantService {
 
         mq.publish(new Event(PAYMENTS_REGISTER_REQ_RK, new Object[] { transaction, correlationId }));
 
-        Event resultEvent = future.join();
+        Event resultEvent;
+        try {
+            resultEvent = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            LOG.error("Failed to register transaction: " + e.getMessage());
+            pendingRequests.remove(correlationId);
+            throw new InternalServerErrorException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal payment service unavailable.")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build());
+        }
         Boolean resultTransaction = resultEvent.getArgument(0, Boolean.class);
         if (resultTransaction) {
-            LOG.warn("Transaction failed!");
-            return false;
-        } else {
-            LOG.info("Transaction succeeded!");
+            LOG.warn("Transaction succeeded!");
             return true;
+        } else {
+            LOG.info("Transaction failed!");
+            return false;
         }
     }
 }
