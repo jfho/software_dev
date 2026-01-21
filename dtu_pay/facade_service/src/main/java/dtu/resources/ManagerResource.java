@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/_manager")
 public class ManagerResource {
-    private ManagerService service = new ManagerService(new RabbitMqQueue());
+    private static final ManagerService service = new ManagerService(new RabbitMqQueue());
 
     @GET
     @Path("/reports")
