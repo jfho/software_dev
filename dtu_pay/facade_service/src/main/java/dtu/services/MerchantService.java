@@ -13,10 +13,6 @@ import dtu.messagingUtils.Event;
 import dtu.messagingUtils.MessageQueue;
 import dtu.models.Merchant;
 import dtu.models.MerchantTransaction;
-import dtu.models.Transaction;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 public class MerchantService {
     MessageQueue mq;

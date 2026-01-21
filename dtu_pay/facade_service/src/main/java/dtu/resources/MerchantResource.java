@@ -86,7 +86,7 @@ public class MerchantResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response registerTransaction(@PathParam("merchantId") String merchantId, MerchantTransaction transaction) {
         MerchantTransaction resultTransaction = new MerchantTransaction(transaction.tokenId(), merchantId,
-                transaction.amount());
+                transaction.amount(), null, null);
         boolean success = service.registerTransaction(resultTransaction);
 
         if (!success) {
