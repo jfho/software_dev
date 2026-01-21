@@ -47,3 +47,8 @@ Feature: Token
         Then the service generates a list of tokens
         And a tokens response includes the list of tokens
         
+    Scenario: Deleting customers token at customer deletion
+        Given a customerId "345" with "5" tokens
+        When a customer deletion request event is emitted
+        Then the customer and its tokens are deleted
+        

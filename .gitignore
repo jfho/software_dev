@@ -63,6 +63,7 @@ buildNumber.properties
 # Built Visual Studio Code Extensions
 *.vsix
 .vsls.json
+.vscode/
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files

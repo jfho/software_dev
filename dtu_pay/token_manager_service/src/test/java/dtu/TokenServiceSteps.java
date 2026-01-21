@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 
 import dtu.messagingUtils.Event;
@@ -26,6 +27,8 @@ public class TokenServiceSteps {
     
     private MessageQueue mq = new MockQueue();
     private TokenService tc = new TokenService(mq);
+
+    private String customerDeletionRequested = "CustomerDeletionRequested";
 
     private String createTokensRequest = "TokensRequested";
     private String createTokensResponse = "TokensGenerated";
@@ -133,4 +136,17 @@ public class TokenServiceSteps {
         assertEquals(tokenList, respTokenList);
         assertEquals(correlationId, respCorrId);
     }
+
+    @When("a customer deletion request event is emitted")
+    public void a_customer_deletion_request_event_is_emitted() {
+        
+        correlationId = "string";
+        mq.publish(new Event(customerDeletionRequested, new Object[] {customerId, correlationId} ));
+    }
+
+    @Then("the customer and its tokens are deleted")
+    public void the_customer_and_its_tokens_are_deleted() {
+        assertEquals(Collections.emptyList(), tc.getAllTokensByCustomer(customerId));
+    }
+
 }
