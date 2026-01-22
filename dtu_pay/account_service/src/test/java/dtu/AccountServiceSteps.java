@@ -1,27 +1,24 @@
 package dtu;
 
+import java.util.UUID;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import java.util.UUID;
-
+import dtu.messagingUtils.Event;
+import dtu.messagingUtils.MessageQueue;
+import dtu.models.Customer;
+import dtu.models.Merchant;
+import dtu.models.Transaction;
+import dtu.services.CustomerService;
+import dtu.services.MerchantService;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import jakarta.ws.rs.NotFoundException;
-import dtu.services.CustomerService;
-import dtu.services.MerchantService;
-import dtu.messagingUtils.Event;
-import dtu.messagingUtils.MessageQueue;
-import dtu.models.Customer;
-import dtu.Database;
-import dtu.models.Merchant;
-import dtu.models.Transaction;
 
 public class AccountServiceSteps {
     Database db = Database.getInstance();
@@ -283,5 +280,47 @@ public class AccountServiceSteps {
         String receivedCorrId = merchantBankAccountResponse.getArgument(1, String.class);
         assertEquals(bankId, receivedBankId);
         assertEquals(corrId, receivedCorrId);
+    }
+
+    Event customerBankAccountError = null;
+    @When("the customer is retrieved")
+    public void customerIsRetrieved() {
+        mq.addHandler(GET_CUSTOMER_RES_RK, e -> {
+            customer = e.getArgument(0, Customer.class);
+        });
+
+        Event event = new Event(
+            GET_CUSTOMER_REQ_RK,
+            new Object[] { customer.dtupayUuid(), UUID.randomUUID().toString() }
+        );
+        mq.publish(event);
+    }
+    @When("a bank account request for the customer with correlation ID {string} and customer id {string}")
+    public void customerBankAccountRequestWithCustomerId(String corrId, String customerId) {
+        // Subscribe to error responses
+        mq.addHandler(BANKACCOUNT_CUSTOMER_RES_RK, event -> {
+            customerBankAccountError = event;
+        });
+
+        Event event = new Event(
+            BANKACCOUNT_CUSTOMER_REQ_RK,
+            new Object[] { customerId, corrId }
+        );
+        mq.publish(event);
+    }
+    @Then("no customer account is returned")
+    public void noCustomerAccountIsReturned() {
+        assertNull(customer);
+    }
+    @Then("a bank account response with an error and correlation ID {string} is emitted")
+    public void customerBankAccountErrorEmitted(String corrId) {
+        assertNotNull(customerBankAccountError);
+        String errorMessage = customerBankAccountError.getArgument(0, String.class);
+        String receivedCorrId = customerBankAccountError.getArgument(1, String.class);
+        assertEquals(corrId, receivedCorrId);
+    }
+    @Then("the customer registration is not successful")
+    public void customerRegistrationNotSuccessful() {
+        assertNull(customer);
     }
 }
