@@ -1,3 +1,7 @@
+/**
+ * @author s215698
+ */
+
 package dtu.util;
 
 import java.util.List;

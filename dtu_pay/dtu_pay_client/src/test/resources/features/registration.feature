@@ -1,3 +1,5 @@
+# Author: s253037
+
 @registration
 Feature: Registration
     Scenario: Register DTUPay customer account

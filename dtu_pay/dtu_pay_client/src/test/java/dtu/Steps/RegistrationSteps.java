@@ -1,3 +1,7 @@
+/**
+ * @author s253037
+ */
+
 package dtu.Steps;
 
 import java.math.BigDecimal;

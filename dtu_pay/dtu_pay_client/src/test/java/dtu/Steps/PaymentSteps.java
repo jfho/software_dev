@@ -1,3 +1,7 @@
+/**
+ * @author s253874
+ */
+
 package dtu.Steps;
 
 import dtu.*;

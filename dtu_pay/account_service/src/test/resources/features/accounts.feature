@@ -1,4 +1,4 @@
-# Author: Jane Doe
+# Author: s253874
 Feature: Account service
     Scenario: Register DTUPay customer account
         When a customer registers for DTUPay with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
@@ -56,7 +56,6 @@ Feature: Account service
         And the customer unregisters for DTUPay
         When the customer with id "Alice-id" is retrieved
         Then no customer account is returned
-
 
     Scenario: Retrieve bank ID for non-existent customer
         And a subscriber for the customer bank account response event

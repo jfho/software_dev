@@ -1,5 +1,5 @@
 /**
- * @author Jane Doe
+ * @author s253874
  */
 package dtu.models;
 

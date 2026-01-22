@@ -1,3 +1,5 @@
+# Author: s253874
+
 @payment
 Feature: Payment
     Scenario: Successful payment

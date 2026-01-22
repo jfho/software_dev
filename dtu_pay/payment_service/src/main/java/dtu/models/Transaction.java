@@ -1,3 +1,7 @@
+/**
+ * @author s253872
+ */
+
 package dtu.models;
 
 import java.math.BigDecimal;

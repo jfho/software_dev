@@ -1,3 +1,7 @@
+/**
+ * @author s253874
+ */
+
 package dtu;
 
 import java.math.BigDecimal;

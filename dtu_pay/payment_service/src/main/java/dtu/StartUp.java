@@ -1,3 +1,7 @@
+/**
+ * @author s243019
+ */
+
 package dtu;
 
 import dtu.adapters.BankClient;

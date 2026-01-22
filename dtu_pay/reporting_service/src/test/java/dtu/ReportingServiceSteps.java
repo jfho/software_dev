@@ -1,3 +1,7 @@
+/**
+ * @author s215698
+ */
+
 package dtu;
 
 import static org.junit.Assert.assertEquals;

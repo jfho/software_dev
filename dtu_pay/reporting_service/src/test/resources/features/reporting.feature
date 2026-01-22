@@ -1,3 +1,5 @@
+# Author: s253874
+
 Feature: Reporting service
     Scenario: Manager requests list of payments
         Given a customer account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678", DTUPay ID "111"

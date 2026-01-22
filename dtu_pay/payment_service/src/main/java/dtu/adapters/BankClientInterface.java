@@ -1,3 +1,7 @@
+/**
+ * @author s243019
+ */
+
 package dtu.adapters;
 
 import java.math.BigDecimal;

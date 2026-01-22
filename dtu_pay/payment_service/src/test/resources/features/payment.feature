@@ -1,3 +1,5 @@
+# Author: s253872
+
 Feature: Payment Service
   Scenario: Successful payment
     Given a transaction with token "valid-token", amount "10" kr and merchant id "mer-123"

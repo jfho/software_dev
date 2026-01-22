@@ -1,3 +1,7 @@
+/**
+ * @author s253872
+ */
+
 package dtu.resources;
 
 import dtu.messagingUtils.implementations.RabbitMqQueue;

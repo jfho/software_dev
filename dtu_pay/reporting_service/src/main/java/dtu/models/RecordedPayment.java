@@ -1,3 +1,7 @@
+/**
+ * @author s214881
+ */
+
 package dtu.models;
 
 public class RecordedPayment {
@@ -8,7 +12,7 @@ public class RecordedPayment {
             String tokenId, 
             String transactionId,
             String timestamp,
-            Boolean ccessful) {
+            Boolean successful) {
 
         this.customerId = customerId;
         this.merchantId = merchantId;
