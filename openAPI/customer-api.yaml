@@ -109,12 +109,12 @@ paths:
             type: string
 
       requestBody:
-      required: true
-      content:
-        text/plain:
-          schema:
-            type: string
-            example: "5"
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: "5"
       responses:
         '200':
           description: Tokens successfully created
@@ -125,7 +125,7 @@ paths:
                 items:
                   type: string
         '400':
-        description: Invalid token request
+          description: Invalid token request
         '404':
           description: Customer not found
 
