@@ -44,3 +44,20 @@ Feature: Account service
         And a subscriber for the merchant bank account response event
         When a bank account request for the merchant with correlation ID "42424242" is emitted
         Then a bank account response for the merchant with bank ID "12345678" and correlation ID "42424242" is emitted
+
+    Scenario: Register customer that already exists
+        Given a customer account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
+        When a customer registers for DTUPay with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
+        Then the customer registration is not successful
+
+    Scenario: Retrieve customer after unregistration
+        Given a customer account with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
+        And the customer unregisters for DTUPay
+        When the customer with id "Alice-id" is retrieved
+        Then no customer account is returned
+
+
+    Scenario: Retrieve bank ID for non-existent customer
+        And a subscriber for the customer bank account response event
+        When a bank account request for the customer with correlation ID "42424242" and customer id "non-existent"
+        Then a bank account response with an error and correlation ID "42424242" is emitted
