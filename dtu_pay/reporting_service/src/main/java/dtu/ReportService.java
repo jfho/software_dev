@@ -164,24 +164,26 @@ public class ReportService {
     }
 
     private synchronized void evaluatePending(String corrId) {
-        RecordedPayment transaction = pendingRecords.get(corrId);
 
-        // Check is record is finished
-        if (transaction.customerId != null &&
-            transaction.merchantId != null &&
-            transaction.amount != null &&
-            transaction.tokenId != null &&
-            transaction.transactionId != null &&
-            transaction.timestamp != null &&
-            transaction.successful != null
-        ) {
+        pendingRecords.computeIfPresent(corrId, (id, trans) ->{
 
-            // Remove finished record, only add to db if successful
-            if (transaction.successful) {
-                db.addPayment(transaction);                    
-            } 
-            pendingRecords.remove(corrId);
-        }
+            if (trans.customerId != null &&
+                trans.merchantId != null &&
+                trans.amount != null &&
+                trans.tokenId != null &&
+                trans.transactionId != null &&
+                trans.timestamp != null &&
+                trans.successful != null
+            ) {
+                // Remove finished record, only add to db if successful
+                if (trans.successful) {
+                    db.addPayment(trans);                    
+                } 
+                return null;
+            }    
+            return trans;
+        });
+
     }
 
     public void clearPendingPayments() {

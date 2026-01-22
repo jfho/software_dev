@@ -94,35 +94,38 @@ public class PaymentService {
     }
 
     private void evaluatePending(String correlationId) {
-        PendingTransaction transaction = pendingTransactions.get(correlationId);
-        if (transaction == null ||
-                transaction.bankCusId == null ||
-                transaction.bankMerId == null ||
-                transaction.amount == null) {
-            return;
-        }
 
-        if (transaction.bankCusId.isEmpty() || transaction.bankMerId.isEmpty()
-                || transaction.amount.compareTo(BigDecimal.ZERO) < 0) {
-            LOG.warn("Transaction failed: Customer or Merchant not found for " + correlationId);
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
-            pendingTransactions.remove(correlationId);
-            return;
-        }
+        pendingTransactions.computeIfPresent(correlationId, (id, trans) ->{
+            if (trans.bankCusId == null ||
+                trans.bankMerId == null ||
+                trans.amount == null) 
+            {
+                return trans;
+            }
 
-        LOG.info("All info present. Initiating bank transfer for correlationId: " + correlationId);
-        boolean transferSuccessful = bankClient.transfer(transaction.bankCusId, transaction.bankMerId,
-                transaction.amount);
+            if (trans.bankCusId.isEmpty() || trans.bankMerId.isEmpty()
+                    || trans.amount.compareTo(BigDecimal.ZERO) < 0) 
+            {
+                LOG.warn("Transaction failed: Customer or Merchant not found for " + correlationId);
+                mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
+                return null;
+            }
 
-        if (transferSuccessful) {
-            LOG.info("Transfer successful for correlationId: " + correlationId);
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { true, correlationId }));
-        } else {
-            LOG.warn("Transaction failed (or incomplete data) for correlationId: " + correlationId);
-            mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
-        }
+            LOG.info("All info present. Initiating bank transfer for correlationId: " + correlationId);
+            boolean transferSuccessful = bankClient.transfer(trans.bankCusId, trans.bankMerId,
+                    trans.amount);
 
-        pendingTransactions.remove(correlationId);
+
+            if (transferSuccessful) {
+                LOG.info("Transfer successful for correlationId: " + correlationId);
+                mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { true, correlationId }));
+            } else {
+                LOG.warn("Transaction failed (or incomplete data) for correlationId: " + correlationId);
+                mq.publish(new Event(PAYMENTS_REGISTER_RES_RK, new Object[] { false, correlationId }));
+            }
+            
+            return null;
+        });
     }
 
     public Map<String, PendingTransaction> getPendingTransactions() {
