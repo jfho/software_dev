@@ -78,33 +78,31 @@ public class ReportService {
             RecordedPayment pendingRecord = e.getArgument(0, RecordedPayment.class);
             String corrId = e.getArgument(1, String.class);
 
-            if (pendingRecords.containsKey(corrId)) {
-                
-                pendingRecords.compute(corrId, (id, trans) -> {
+
+            pendingRecords.compute(corrId, (id, trans) -> {
+
+                if (trans == null) {
+                    String timestamp = Instant.now().toString();
+                    String transactionId = UUID.randomUUID().toString();
+
+                    trans = new RecordedPayment(
+                        null, 
+                        pendingRecord.merchantId, 
+                        pendingRecord.amount, 
+                        pendingRecord.tokenId, 
+                        transactionId, 
+                        timestamp, 
+                        null);
+                } else {
                     trans.amount = pendingRecord.amount;
                     trans.merchantId = pendingRecord.merchantId;
                     trans.tokenId = pendingRecord.tokenId;
+                }
+            
+                return trans;
+            });
 
-                    return trans;
-                });
-
-                evaluatePending(corrId);
-
-            } else {
-                String timestamp = Instant.now().toString();
-                String transactionId = UUID.randomUUID().toString();
-
-                RecordedPayment updatePayment = new RecordedPayment(
-                    null, 
-                    pendingRecord.merchantId, 
-                    pendingRecord.amount, 
-                    pendingRecord.tokenId, 
-                    transactionId, 
-                    timestamp, 
-                    null);
-
-                pendingRecords.put(corrId, updatePayment);
-            }
+            evaluatePending(corrId);
         });
 
         queue.addHandler(TRANSACTION_COMPLETED_RK, e -> {
@@ -112,64 +110,60 @@ public class ReportService {
             Boolean transferSuccessful = e.getArgument(0, Boolean.class);
             String corrId = e.getArgument(1, String.class);
 
-            if (pendingRecords.containsKey(corrId)) {
-                
-                pendingRecords.compute(corrId, (id, trans) -> {
+
+            pendingRecords.compute(corrId, (id, trans) -> {
+
+                if (trans == null) {
+                    String timestamp = Instant.now().toString();
+                    String transactionId = UUID.randomUUID().toString();
+
+                    trans = new RecordedPayment(
+                        null, 
+                        null, 
+                        null, 
+                        null, 
+                        transactionId, 
+                        timestamp, 
+                        transferSuccessful);
+                } else {
                     trans.successful = transferSuccessful;
-                    return trans;
-                });
+                }
+            
+                return trans;
+            });
+            evaluatePending(corrId);
 
-                evaluatePending(corrId);
-
-            } else {
-                String timestamp = Instant.now().toString();
-                String transactionId = UUID.randomUUID().toString();
-
-                RecordedPayment updatePayment = new RecordedPayment(
-                    null, 
-                    null, 
-                    null, 
-                    null, 
-                    transactionId, 
-                    timestamp, 
-                    transferSuccessful);
-
-                pendingRecords.put(corrId, updatePayment);
-            }
         });
 
         queue.addHandler(TOKEN_VALIDATED, e -> {
             String customerId = e.getArgument(0, String.class);
             String corrId = e.getArgument(1, String.class);
 
-            if (pendingRecords.containsKey(corrId)) {
-                
-                pendingRecords.compute(corrId, (id, trans) -> {
+            pendingRecords.compute(corrId, (id, trans) -> {
+
+                if (trans == null) {
+                    String timestamp = Instant.now().toString();
+                    String transactionId = UUID.randomUUID().toString();
+
+                    trans = new RecordedPayment(
+                        customerId, 
+                        null, 
+                        null, 
+                        null, 
+                        transactionId, 
+                        timestamp, 
+                        null);
+                } else {
                     trans.customerId = customerId;
-                    return trans;
-                });
-
-                evaluatePending(corrId);
-
-            } else {
-                String timestamp = Instant.now().toString();
-                String transactionId = UUID.randomUUID().toString();
-
-                RecordedPayment updatePayment = new RecordedPayment(
-                    customerId, 
-                    null, 
-                    null, 
-                    null, 
-                    transactionId, 
-                    timestamp, 
-                    null);
-
-                pendingRecords.put(corrId, updatePayment);
-            }
+                }
+            
+                return trans;
+            });
+            evaluatePending(corrId);
         });
     }
 
-    private void evaluatePending(String corrId) {
+    private synchronized void evaluatePending(String corrId) {
         RecordedPayment transaction = pendingRecords.get(corrId);
 
         // Check is record is finished
@@ -187,7 +181,7 @@ public class ReportService {
                 db.addPayment(transaction);                    
             } 
             pendingRecords.remove(corrId);
-        } 
+        }
     }
 
     public void clearPendingPayments() {
