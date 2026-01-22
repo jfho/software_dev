@@ -4,17 +4,27 @@
 
 package dtu.Steps;
 
-import dtu.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+
+import dtu.BankClient;
+import dtu.CustomerClient;
+import dtu.ManagerClient;
+import dtu.MerchantClient;
+import dtu.State;
 import dtu.Models.BankAccount;
 import dtu.Models.Customer;
 import dtu.Models.Merchant;
 import dtu.Models.Transaction;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import io.cucumber.java.en.*;
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.*;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 public class ReportSteps {
 
@@ -130,6 +140,11 @@ public class ReportSteps {
     @When("the customer requests the report")
     public void customerRequestsReport() {
         state.transactions = customerClient.getReports(state.customer.dtupayUuid());
+    }
+
+    @When("a customer with customerID {string} requests the report")
+    public void customerRequestsReportWithId(String id) {
+        state.transactions = customerClient.getReports(id);
     }
 
     @When("the merchant requests the report")

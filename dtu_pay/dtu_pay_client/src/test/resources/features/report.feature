@@ -64,4 +64,7 @@ Feature: Report
         When the customer requests the report
         Then the customer gets an empty report
     
+    Scenario: Customer requests report with invalid customer ID
+        When a customer with customerID "non-existent" requests the report
+        Then the customer gets an empty report
 
