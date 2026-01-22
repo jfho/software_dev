@@ -1,3 +1,4 @@
+# Author: Jane Doe
 Feature: Account service
     Scenario: Register DTUPay customer account
         When a customer registers for DTUPay with first name "Alice", last name "Alicey", CPR "123456-1234", bank ID "12345678"
