@@ -8,39 +8,31 @@ popd
 
 # Test and compile service
 pushd dtu_pay/facade_service
-# Create jar file
+# Run tests and create jar file
 mvn clean package -B
 popd
 
 # Test and compile service
 pushd dtu_pay/token_manager_service
-# Run tests
-mvn clean test -B
-# Create jar file
+# Run tests and create jar file
 mvn clean package -B
 popd
 
 # Test and compile service
 pushd dtu_pay/payment_service
-# Run tests
-mvn clean test -B
-# Create jar file
+# Run tests and create jar file
 mvn clean package -B
 popd
 
 # Test and compile service
 pushd dtu_pay/account_service
-# Run tests
-mvn clean test -B
-# Create jar file
+# Run tests and create jar file
 mvn clean package -B
 popd
 
 # Test and compile service
 pushd dtu_pay/reporting_service
-# Run tests
-mvn clean test -B
-# Create jar file
+# Run tests and create jar file
 mvn clean package  -B
 popd
 
